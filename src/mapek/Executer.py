@@ -1,4 +1,4 @@
-from src.mapek import Component
+from mapek.Component import Component
 
 class Executer(Component):
     pass
