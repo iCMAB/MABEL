@@ -1,1 +1,1 @@
-# iCMAB-SimulationTool
+# iCMAB Simulation Tool
