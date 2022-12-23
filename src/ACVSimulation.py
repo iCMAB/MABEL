@@ -5,7 +5,6 @@ from mapek.Planner import Planner
 from mapek.Executer import Executer
 from subject.PositionSensor import PositionSensor
 
-
 def run_simulation():
     knowledge = Knowledge()
     knowledge.ideal_distance = 3

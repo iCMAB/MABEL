@@ -14,12 +14,12 @@ class PositionSensor(Observable):
             self.positions[acv_index] = (row['x'], row['y'])
             self.notify(acv_index, self.positions)
 
-            time.sleep(0.5)
+            time.sleep(1)
 
     def receive_decision(self, index, distance_to_closest, penalty, decision):
-        print('Index: ' + str(index))
-        print('Distance to closest: ' + str(distance_to_closest))
-        print('Penalty: ' + str(penalty))
+        print('ACV Index: ' + str(index))
+        print('Distance to closest ACV: ' + "{0:.2f}".format(distance_to_closest))
+        print('Penalty: ' + "{0:.2f}".format(penalty))
         print('Decision received: ' + str(decision))
         print()
         

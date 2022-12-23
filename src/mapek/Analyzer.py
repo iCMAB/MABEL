@@ -14,8 +14,6 @@ class Analyzer(Component):
         index = knowledge.current_index
         ideal_distance = knowledge.ideal_distance
 
-        print(positions)
-
         current_position = positions.pop(index)
         current_position = numpy.asarray(current_position)
         

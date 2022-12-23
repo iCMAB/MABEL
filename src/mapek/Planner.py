@@ -13,7 +13,6 @@ class Planner(Component):
         ideal_distance = knowledge.ideal_distance
 
         plan = "Do nothing"
-
         if system_will_adapt:
             if distance_to_closest < ideal_distance:
                 plan = "Slow down"
