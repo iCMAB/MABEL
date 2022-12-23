@@ -16,6 +16,10 @@ class PositionSensor(Observable):
 
             time.sleep(0.5)
 
-    def notify_num(self):
-        self.notify(42)
+    def receive_decision(self, index, distance_to_closest, penalty, decision):
+        print('Index: ' + str(index))
+        print('Distance to closest: ' + str(distance_to_closest))
+        print('Penalty: ' + str(penalty))
+        print('Decision received: ' + str(decision))
+        print()
         

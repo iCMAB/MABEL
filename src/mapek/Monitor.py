@@ -13,5 +13,6 @@ class Monitor(Observer, Component):
     def execute(self, index, positions):
         knowledge = Knowledge()
         knowledge.current_index = index
-        self.analyzer.execute()
+
+        self.analyzer.execute(positions.copy())
         

@@ -1,14 +1,15 @@
 class Knowledge:
     __instance = None
+
+    ideal_distance = None
+    current_index = None
+    current_distance_to_closest = None
+    current_penalty = None
+
     def __new__(cls, *args):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls, *args)
         return cls.__instance
-
-    def __init__(self, ideal_distance):
-        self.ideal_distance = ideal_distance
-        self.current_index = 0
-        self.distance_to_closest = None
 
     @property
     def ideal_distance(self):
@@ -34,8 +35,10 @@ class Knowledge:
     def distance_to_closest(self, value):
         self._distance_to_closest = value
 
-    def printit(self):
-        print(self.ideal_distance)
-        print(self.current_index)
-        print(self.distance_to_closest)
-        print()
+    @property
+    def penalty(self):
+        return self._penalty
+
+    @penalty.setter
+    def penalty(self, value):
+        self._penalty = value
