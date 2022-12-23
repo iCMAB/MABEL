@@ -2,5 +2,5 @@ from abc import ABC, abstractmethod
 
 class Observer(ABC):
     @abstractmethod
-    def update(num):
+    def update(index, positions):
         pass

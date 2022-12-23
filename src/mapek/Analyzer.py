@@ -1,4 +1,5 @@
 from mapek.Component import Component
 
 class Analyzer(Component):
-    pass
+    def execute():
+        pass

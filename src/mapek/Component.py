@@ -1,3 +1,3 @@
 class Component:
-    def execute(object):
+    def execute():
         pass

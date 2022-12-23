@@ -1,3 +1,4 @@
+from mapek.Knowledge import Knowledge
 from mapek.Monitor import Monitor
 from subject.PositionSensor import PositionSensor
 
