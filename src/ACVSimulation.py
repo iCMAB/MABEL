@@ -7,7 +7,7 @@ def run_simulation():
     sensor = PositionSensor()
 
     sensor.register(monitor)
-    sensor.notify_num()
+    sensor.read_data()
 
 if __name__ == '__main__':
     run_simulation()
