@@ -1,44 +1,35 @@
 class Knowledge:
     __instance = None
 
+    target_speed = None
     ideal_distance = None
-    current_index = None
-    current_distance_to_closest = None
-    current_penalty = None
+    starting_speeds = None
 
     def __new__(cls, *args):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls, *args)
         return cls.__instance
 
-    @property
-    def ideal_distance(self):
-        return self._ideal_distance
+    # @property
+    # def target_speed(self):
+    #     return self.target_speed
 
-    @ideal_distance.setter
-    def ideal_distance(self, value):
-        self._ideal_distance = value
+    # @target_speed.setter
+    # def target_speed(self, value):
+    #     self.target_speed = value
 
-    @property
-    def current_index(self):
-        return self._current_index
+    # @property
+    # def ideal_distance(self):
+    #     return self._ideal_distance
 
-    @current_index.setter
-    def current_index(self, value):
-        self._current_index = value
+    # @ideal_distance.setter
+    # def ideal_distance(self, value):
+    #     self.ideal_distance = value
 
-    @property
-    def distance_to_closest(self):
-        return self._distance_to_closest
+    # @property
+    # def starting_speeds(self):
+    #     return self.starting_speeds
 
-    @distance_to_closest.setter
-    def distance_to_closest(self, value):
-        self._distance_to_closest = value
-
-    @property
-    def penalty(self):
-        return self._penalty
-
-    @penalty.setter
-    def penalty(self, value):
-        self._penalty = value
+    # @starting_speeds.setter
+    # def starting_speeds(self, value):
+    #     self.starting_speeds = value

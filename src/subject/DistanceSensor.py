@@ -2,6 +2,7 @@ import pandas, time
 
 from subject.Observable import Observable
 from subject.ACV import ACV
+from mapek.Knowledge import Knowledge
 
 class DistanceSensor(Observable):
     def __init__(self):
@@ -19,20 +20,38 @@ class DistanceSensor(Observable):
 
     def run_update_loop(self):
         while True:
+            self.print_acv_locations()
             self.update_distances()
             time.sleep(1)
 
     def update_distances(self):
-        distances = [0] * (len(self.acvs) - 1) # Num ACVs minus the starting one, which won't change
+        knowledge = Knowledge()
+        distances = list()
+        speeds = list()
 
         # Get distances between ACVs
         for (index, acv) in enumerate(self.acvs):
             if index == 0:
+                knowledge.target_speed = acv.speed
                 continue
 
-            distances[index - 1] = self.acvs[index - 1].location - acv.location
+            distances.append(self.acvs[index - 1].location - acv.location)
+            speeds.append(acv.speed)
         
-        self.notify(index, distances)
+        self.notify(distances, speeds)
     
-    def update_acv_speeds(self, index, speed):
-        pass
+    def recieve_speed_modifications(self, speed_modifiers: list):
+        for (index, acv) in enumerate(self.acvs):
+            if index == 0:
+                acv.update(0)
+                continue
+
+            acv.update(speed_modifiers[index - 1])
+    
+    def print_acv_locations(self):
+        locations = list()
+        
+        for acv in self.acvs:
+            locations.append(acv.location)
+
+        print(locations)

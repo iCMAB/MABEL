@@ -6,17 +6,13 @@ class Planner(Component):
     def __init__(self, executer: Executer):
         self.executer = executer
 
-    def execute(self, system_will_adapt):
+    def execute(self, new_speeds: list):
         knowledge = Knowledge()
+        starting_speeds = knowledge.starting_speeds
 
-        distance_to_closest = knowledge.distance_to_closest
-        ideal_distance = knowledge.ideal_distance
+        speed_modifiers = list()
 
-        plan = "Do nothing"
-        if system_will_adapt:
-            if distance_to_closest < ideal_distance:
-                plan = "Slow down"
-            elif distance_to_closest > ideal_distance:
-                plan = "Speed up"
+        for (index, new_speed) in enumerate(new_speeds):
+            speed_modifiers.append(new_speed - starting_speeds[index])
 
-        self.executer.execute(plan)
+        self.executer.execute(speed_modifiers)

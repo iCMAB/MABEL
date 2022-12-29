@@ -8,26 +8,16 @@ class Analyzer(Component):
     def __init__(self, planner: Planner):
         self.planner = planner
 
-    def execute(self, positions):
+    def execute(self, distances: list):
         knowledge = Knowledge()
 
-        index = knowledge.current_index
+        target_speed = knowledge.target_speed
         ideal_distance = knowledge.ideal_distance
-
-        current_position = positions.pop(index)
-        current_position = numpy.asarray(current_position)
+        speeds = list()
         
-        distances = list()
-        for position in positions:
-            to_position = numpy.asarray(position)
-            distance = numpy.linalg.norm(current_position - to_position, axis=0)
-            distances.append(distance)
+        for distance in distances:
+            current_Speed = target_speed + (distance - ideal_distance)
+            speeds.append(current_Speed)
 
-        closest_distance = min(distances)
-        penalty = numpy.square(closest_distance - ideal_distance)
-        knowledge.distance_to_closest = closest_distance
-        knowledge.penalty = penalty
-
-        system_will_adapt = penalty > 1
-        self.planner.execute(system_will_adapt)
+        self.planner.execute(speeds)
         

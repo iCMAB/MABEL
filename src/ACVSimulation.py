@@ -7,7 +7,7 @@ from subject.DistanceSensor import DistanceSensor
 
 def run_simulation():
     knowledge = Knowledge()
-    knowledge.ideal_distance = 3
+    knowledge.ideal_distance = 5
 
     sensor = DistanceSensor()
 

@@ -10,6 +10,6 @@ class Observable:
     def deregister(self, component: Component):
         self.subscribers.remove(component)
 
-    def notify(self, index: int, positions: list):
+    def notify(self, distances: list, starting_speeds: list):
         for subscriber in self.subscribers:
-            subscriber.update(index, positions)
+            subscriber.update(distances, starting_speeds)
