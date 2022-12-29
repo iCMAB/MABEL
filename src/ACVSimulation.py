@@ -3,13 +3,13 @@ from mapek.Monitor import Monitor
 from mapek.Analyzer import Analyzer
 from mapek.Planner import Planner
 from mapek.Executer import Executer
-from subject.PositionSensor import PositionSensor
+from subject.DistanceSensor import DistanceSensor
 
 def run_simulation():
     knowledge = Knowledge()
     knowledge.ideal_distance = 3
 
-    sensor = PositionSensor()
+    sensor = DistanceSensor()
 
     executer = Executer(sensor)
     planner = Planner(executer)

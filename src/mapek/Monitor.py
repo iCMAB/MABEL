@@ -7,12 +7,14 @@ class Monitor(Observer, Component):
     def __init__(self, analyzer: Analyzer):
         self.analyzer = analyzer
 
-    def update(self, index, positions):
-        self.execute(index, positions.copy())
+    def update(self, index, distances):
+        self.execute(index, distances.copy())
 
-    def execute(self, index, positions):
+    def execute(self, index, distances):
         knowledge = Knowledge()
         knowledge.current_index = index
 
-        self.analyzer.execute(positions)
+        print(distances)
+
+        # self.analyzer.execute(distance)
         

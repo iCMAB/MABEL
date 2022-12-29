@@ -1,10 +1,10 @@
 from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 
-from subject.PositionSensor import PositionSensor
+from subject.DistanceSensor import DistanceSensor
 
 class Executer(Component):
-    def __init__(self, sensor: PositionSensor):
+    def __init__(self, sensor: DistanceSensor):
         self.sensor = sensor
 
     def execute(self, plan):
