@@ -65,7 +65,7 @@ class DistanceSensor(Observable):
                 self.update_distances()
             
             self.print_acv_locations(i)
-            time.sleep(1)
+            #time.sleep(1)
 
     def update_distances(self):
         """Updates the distances between the ACVs and sends the data to the MAPE-K loop to determine speed adaptation."""
@@ -123,6 +123,24 @@ class DistanceSensor(Observable):
 
             acv.update(speed_modifiers[index - 1])
     
+    def detect_crashes(self):
+        """
+        Checks if an ACV has crashed into another ACV.
+
+        Returns:
+            list(): A list of tuple containing the two crashed ACVs.
+        """
+
+        crash_list = list()
+        for (index, acv) in enumerate(self.acvs):
+            if index == 0:
+                continue
+
+            if acv.location > self.acvs[index - 1].location:
+                crash_list.append((index, index - 1))
+        
+        return crash_list
+
     def print_acv_locations(self, iteration):
         """
         Prints the locations of each ACV.
@@ -165,13 +183,21 @@ class DistanceSensor(Observable):
         locations = [round(acv.location, 2) for acv in self.acvs]
         speeds = [round(acv.speed, 2) for acv in self.acvs]
         distances = [round(acv.distance, 2) for acv in self.acvs]
+        crash_list = self.detect_crashes()
 
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
         lead_acv_col = [speeds[0], locations[0]]
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
         column_aggregate = template.format(iteration, *lead_acv_col, *trailing_acv_cols)
 
+        # Handle distance modification and crash flags
+        distance_mod_flag = ""
+        crash_flag = ""
         if (iteration in self.iterations_to_mod):
-            column_aggregate += " <--- DISTANCE MODIFIED (x" + str(self.iterations_to_mod[iteration]) + ")"
+            distance_mod_flag = " <-- DISTANCE MODIFIED (" + str(self.iterations_to_mod[iteration]) + "x)"
 
-        print(column_aggregate)
+        if (crash_list != []):
+            separator = " : " if distance_mod_flag != "" else " <-- "
+            crash_flag = separator + "CRASH DETECTED " + "".join(["(ACV" + str(crash[0]) + " and ACV" + str(crash[1]) + ")" for crash in crash_list]) 
+
+        print(column_aggregate + distance_mod_flag + crash_flag)
