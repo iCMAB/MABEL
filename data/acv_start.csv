@@ -1,4 +1,4 @@
-acv_index,location,speed,ideal_distance
-0,5,10,5
-1,0,0,5
+acv_index,location,speed
+0,5,10
+1,0,0
 

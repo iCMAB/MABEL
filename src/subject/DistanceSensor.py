@@ -14,7 +14,7 @@ class DistanceSensor(Observable):
 
         # Initialize ACVs
         for index, row in data.iterrows():
-            self.acvs.append(ACV(int(row['acv_index']), float(row['location']), float(row['speed']), float(row['ideal_distance'])))
+            self.acvs.append(ACV(int(row['acv_index']), float(row['location']), float(row['speed'])))
 
         self.run_update_loop()
 
@@ -43,6 +43,7 @@ class DistanceSensor(Observable):
             speeds.append(acv.speed)
         
         self.notify(distances, speeds)
+    
     
     def recieve_speed_modifications(self, speed_modifiers: list):
         for (index, acv) in enumerate(self.acvs):
@@ -74,6 +75,7 @@ class DistanceSensor(Observable):
             # Print divider
             print(template.replace(" ", "-").replace(":", ":-").replace("|", "+").format(*[''] + ['' for _ in range(acv_columns)]))
 
+        # Get locations and speeds for each ACV
         locations = list()
         speeds = list()
         for acv in self.acvs:
