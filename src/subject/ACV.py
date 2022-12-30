@@ -5,6 +5,7 @@ class ACV:
         index (int): The index of the ACV.
         location (float): The current location of the ACV.
         speed (float): The current speed of the ACV.
+        distance (float): The distance between the ACV and the ACV in front of it.
     """
 
     def __init__(self, index: int, start_location: float, start_speed: float):
@@ -20,6 +21,7 @@ class ACV:
         self.index = index
         self.location = start_location
         self.speed = start_speed  
+        self.distance = 0
 
     def update(self, speed_modifier):
         """

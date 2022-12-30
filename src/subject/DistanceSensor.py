@@ -1,4 +1,4 @@
-import pandas, time, subject, random
+import pandas, time, subject, random, itertools
 
 from subject.Observable import Observable
 from subject.ACV import ACV
@@ -78,6 +78,7 @@ class DistanceSensor(Observable):
                 continue
 
             distance = self.mod_distance(self.acvs[index - 1].location - acv.location)
+            acv.distance = distance
 
             distances.append(distance)
             speeds.append(acv.speed)
@@ -127,14 +128,17 @@ class DistanceSensor(Observable):
             iteration (int): The current iteration.
         """
 
-        # 2 columns per ACV (location, speed)
-        acv_columns = len(self.acvs) * 2
+        # 3 columns per ACV (distance, speed, location) and only 2 columns for lead ACV (speed, location)
+        acv_columns = (len(self.acvs) - 1) * 3
 
-        # index column is 4 wide, each location/speed column is 8 wide
-        template = " | ".join(['{:>4}'] + ['{:^8}' for _ in range(acv_columns)])
+        # Iteration column is 4 wide, each location/speed column is 8 wide. Format makes it so each ACV is divided by || and each individual column is divided by |
+        spacings = ['{:>4}', '{:^8}', '{:^8}'] + ['{:^8}' for _ in range(acv_columns)]
+        template = [spacings[0] + " || " + spacings[1] + " | " + spacings[2]]     # Iter + lead ACV columns
+        template += [" || " + " | ".join(spacings[3*i:3*i+3]) for i in range(1, (acv_columns // 3) + 1)]  # All other ACV columns
+        template = "".join(template)
 
         if iteration == 0:
-            # Print out which iterations will be modified
+            # Print out ideal distance and which iterations will be modified
             print("=====================================")
             print("Ideal distance: " + str(subject.IDEAL_DISTANCE))
             print("Modifying distance in iterations: \n", *["> " + str(iteration) + " (x" + str(value) + ")\n" for iteration, value in self.iterations_to_mod.items()])
@@ -142,27 +146,29 @@ class DistanceSensor(Observable):
             # Header for ACV index (ACV1, ACV2, etc.)
             acv_headers = [''] + ['ACV' + str(acv.index + 1) for acv in self.acvs]
 
-            # Each ACV column is 19 wide to account for 2 8-wide columns plus the 3-character divider
-            acv_template = " | ".join(['{:>4}'] + ['{:^19}' for _ in range(len(self.acvs))])
+            # Lead ACV column is 19 wide (2 8-wide columns + 1 3-character divider)
+            # All other ACV columns are 30 wide (3 8-wide columns + 2 3-character dividers)
+            acv_template = " || ".join(['{:>4}', '{:^19}'] + ['{:^30}' for _ in range(len(self.acvs) - 1)])
             print(acv_template.format(*acv_headers))
 
             # Headers for iteration index and alternating speed/location columns
-            detail_headers = ['Iter'] + [('Speed' if i % 2 == 0 else 'Location') for i in range(acv_columns)]
+            detail_headers = ['Iter', 'Speed', 'Location'] + [('Speed' if i % 3 == 0 else ('Location' if i % 3 == 1 else 'Distance')) for i in range(acv_columns)]
             print(template.format(*detail_headers))
 
             # Print divider
-            print(template.replace(" ", "-").replace(":", ":-").replace("|", "+").format(*[''] + ['' for _ in range(acv_columns)]))
+            print(template.replace(" ", "-").replace(":", ":-").replace("|", "+").format(*['', '', ''] + ['' for _ in range(acv_columns)]))
 
         # Get locations and speeds for each ACV
-        locations = list()
-        speeds = list()
-        for acv in self.acvs:
-            locations.append(round(acv.location, 2))
-            speeds.append(round(acv.speed, 2))
+        locations = [round(acv.location, 2) for acv in self.acvs]
+        speeds = [round(acv.speed, 2) for acv in self.acvs]
+        distances = [round(acv.distance, 2) for acv in self.acvs]
 
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
-        column = template.format(iteration, *[speeds[i // 2] if i % 2 == 0 else locations[i // 2] for i in range(acv_columns)]) 
-        if (iteration in self.iterations_to_mod):
-            column += " <--- DISTANCE MODIFIED (x" + str(self.iterations_to_mod[iteration]) + ")"
+        lead_acv_col = [speeds[0], locations[0]]
+        trailing_acv_cols = list(itertools.chain.from_iterable([[speeds[i], locations[i], distances[i]] for i in range(1, len(self.acvs))]))
+        column_aggregate = template.format(iteration, *lead_acv_col, *trailing_acv_cols)
 
-        print(column)
+        if (iteration in self.iterations_to_mod):
+            column_aggregate += " <--- DISTANCE MODIFIED (x" + str(self.iterations_to_mod[iteration]) + ")"
+
+        print(column_aggregate)
