@@ -19,9 +19,13 @@ class DistanceSensor(Observable):
         self.run_update_loop()
 
     def run_update_loop(self):
+        index = 0
+        
         while True:
-            self.print_acv_locations()
+            self.print_acv_locations(index)
             self.update_distances()
+            index += 1
+
             time.sleep(1)
 
     def update_distances(self):
@@ -48,10 +52,33 @@ class DistanceSensor(Observable):
 
             acv.update(speed_modifiers[index - 1])
     
-    def print_acv_locations(self):
+    def print_acv_locations(self, index):
+        # 2 columns per ACV (location, speed)
+        acv_columns = len(self.acvs) * 2
+
+        # index column is 4 wide, each location/speed column is 8 wide
+        template = " | ".join(['{:>4}'] + ['{:^8}' for _ in range(acv_columns)])
+
+        if index == 0:
+            # Header for ACV index (ACV1, ACV2, etc.)
+            acv_headers = [''] + ['ACV' + str(acv.index + 1) for acv in self.acvs]
+
+            # Each ACV column is 19 wide to account for 2 8-wide columns plus the 3-character divider
+            acv_template = " | ".join(['{:>4}'] + ['{:^19}' for _ in range(len(self.acvs))])
+            print(acv_template.format(*acv_headers))
+
+            # Headers for iteration index and alternating location/speed columns
+            detail_headers = ['Iter'] + [('Location' if i % 2 == 0 else 'Speed') for i in range(acv_columns)]
+            print(template.format(*detail_headers))
+
+            # Print divider
+            print(template.replace(" ", "-").replace(":", ":-").replace("|", "+").format(*[''] + ['' for _ in range(acv_columns)]))
+
         locations = list()
-        
+        speeds = list()
         for acv in self.acvs:
             locations.append(acv.location)
+            speeds.append(acv.speed)
 
-        print(locations)
+        # Print index and alternating location/speed columns for the respective ACV (// is floor division)
+        print(template.format(index, *[locations[i // 2] if i % 2 == 0 else speeds[i // 2] for i in range(acv_columns)]))
