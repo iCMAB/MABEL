@@ -4,9 +4,17 @@ from mapek.Knowledge import Knowledge
 
 class Planner(Component):
     def __init__(self, executer: Executer):
+        """Initializes the MAPE-K loop planner with the executer."""
+
         self.executer = executer
 
     def execute(self, new_speeds: list):
+        """
+        Calculates what to modify the current ACV speeds by to reach the desired speeds and sends it to the executer
+        
+        Args:
+            new_speeds (list): List of desired speeds for each relevant ACV
+        """
         knowledge = Knowledge()
         starting_speeds = knowledge.starting_speeds
 

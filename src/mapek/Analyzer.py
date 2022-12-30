@@ -6,9 +6,18 @@ from mapek.Planner import Planner
 
 class Analyzer(Component):
     def __init__(self, planner: Planner):
+        """Initializes the MAPE-K loop analyzer with the planner."""
+        
         self.planner = planner
 
     def execute(self, distances: list):
+        """
+        Calculates the desired speed for each ACV and sends it to the planner
+        
+        Args:
+            distances (list): List of distances from the sensors for each relevant ACV
+        """
+
         knowledge = Knowledge()
         target_speed = knowledge.target_speed
         ideal_distance = knowledge.ideal_distance
