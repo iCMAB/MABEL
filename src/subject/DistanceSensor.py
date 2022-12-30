@@ -6,12 +6,20 @@ from mapek.Knowledge import Knowledge
 
 class DistanceSensor(Observable):
     def __init__(self):
+        """Initialize the DistanceSensor class."""
         super().__init__()
         self.acvs = list()
         self.iteration = 0
         self.iterations_to_mod = self.calculate_mod_iterations()
 
     def calculate_mod_iterations(self) -> dict:
+        """
+        Calculates the iterations that will be modified and the amount to modify them by.
+        
+        Returns:
+            dict: A dictionary of iterations to modify and the amount to modify them by.
+        """
+
         num_iterations = subject.ITERATIONS
         mod_percent = subject.PERCENT_MODIFIED
         num_modded = round(num_iterations * mod_percent) # Floors the decimal value for all positive numbers
@@ -27,6 +35,8 @@ class DistanceSensor(Observable):
         return iteration_mod_pair
 
     def read_data(self):
+        """Reads the starting data from the CSV file, initializes the ACVs, and starts the update loop."""
+
         data = pandas.read_csv('data/acv_start.csv')
 
         # Initialize ACVs
@@ -36,6 +46,8 @@ class DistanceSensor(Observable):
         self.run_update_loop()
 
     def run_update_loop(self):
+        """Runs the update loop for the distance sensor."""
+
         for i in range(subject.ITERATIONS):
             self.iteration = i
             self.print_acv_locations(i)
@@ -44,6 +56,8 @@ class DistanceSensor(Observable):
             time.sleep(1)
 
     def update_distances(self):
+        """Updates the distances between the ACVs and sends the data to the MAPE-K loop to determine speed adaptation."""
+
         knowledge = Knowledge()
         distances = list()
         speeds = list()
@@ -63,6 +77,17 @@ class DistanceSensor(Observable):
         self.notify(distances, speeds)
     
     def mod_distance(self, distance) -> float:
+        """
+        Determines if a distance should be modified based on the current iteration and returns the modified distance.
+        Does nothing if the distance should not be modified.
+
+        Args:
+            distance (float): The distance to be modified.
+
+        Returns:
+            float: The modified distance.
+        """
+
         modded_distance = distance
         if self.iteration in self.iterations_to_mod.keys():
             modded_distance = distance * self.iterations_to_mod[self.iteration]
@@ -70,6 +95,13 @@ class DistanceSensor(Observable):
         return modded_distance
 
     def recieve_speed_modifications(self, speed_modifiers: list):
+        """
+        Updates each ACV with speed modifications
+        
+        Args:
+            speed_modifiers (list): A list of speed modifiers to apply to each ACV.
+        """
+
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV
             if index == 0:
@@ -78,14 +110,21 @@ class DistanceSensor(Observable):
 
             acv.update(speed_modifiers[index - 1])
     
-    def print_acv_locations(self, index):
+    def print_acv_locations(self, iteration):
+        """
+        Prints the locations of each ACV.
+
+        Args:
+            iteration (int): The current iteration.
+        """
+        
         # 2 columns per ACV (location, speed)
         acv_columns = len(self.acvs) * 2
 
         # index column is 4 wide, each location/speed column is 8 wide
         template = " | ".join(['{:>4}'] + ['{:^8}' for _ in range(acv_columns)])
 
-        if index == 0:
+        if iteration == 0:
             # Print out which iterations will be modified
             print("=====================================")
             print("Ideal distance: " + str(subject.IDEAL_DISTANCE))
@@ -113,8 +152,8 @@ class DistanceSensor(Observable):
             speeds.append(round(acv.speed, 2))
 
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
-        column = template.format(index, *[speeds[i // 2] if i % 2 == 0 else locations[i // 2] for i in range(acv_columns)]) 
-        if (index in self.iterations_to_mod):
-            column += " <--- DISTANCE MODIFIED (x" + str(self.iterations_to_mod[index]) + ")"
+        column = template.format(iteration, *[speeds[i // 2] if i % 2 == 0 else locations[i // 2] for i in range(acv_columns)]) 
+        if (iteration in self.iterations_to_mod):
+            column += " <--- DISTANCE MODIFIED (x" + str(self.iterations_to_mod[iteration]) + ")"
 
         print(column)

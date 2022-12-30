@@ -8,6 +8,7 @@ from mapek.Executer import Executer
 from subject.DistanceSensor import DistanceSensor
 
 def run_simulation():
+    """Runs the ACV simulation."""
     knowledge = Knowledge()
     knowledge.ideal_distance = subject.IDEAL_DISTANCE
 
