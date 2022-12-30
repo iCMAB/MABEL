@@ -57,7 +57,7 @@ class DistanceSensor(Observable):
     def run_update_loop(self):
         """Runs the update loop for the distance sensor."""
 
-        for i in range(subject.ITERATIONS):
+        for i in range(subject.ITERATIONS + 1):
             self.iteration = i
 
             # Only update after first iteration so iteration 0 displays the starting values
@@ -128,7 +128,7 @@ class DistanceSensor(Observable):
         Checks if an ACV has crashed into another ACV.
 
         Returns:
-            list(): A list of tuple containing the two crashed ACVs.
+            list(): A list of tuples containing the two crashed ACVs.
         """
 
         crash_list = list()
@@ -160,7 +160,7 @@ class DistanceSensor(Observable):
 
         if iteration == 0:
             # Print out ideal distance and which iterations will be modified
-            print("=====================================")
+            print("=====================================\n")
             print("Ideal distance: " + str(subject.IDEAL_DISTANCE))
             print("Modifying distance in iterations: \n", *["> " + str(iteration) + " (x" + str(value) + ")\n" for iteration, value in self.iterations_to_mod.items()])
 
