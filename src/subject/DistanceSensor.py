@@ -59,9 +59,12 @@ class DistanceSensor(Observable):
 
         for i in range(subject.ITERATIONS):
             self.iteration = i
-            self.print_acv_locations(i)
-            self.update_distances()
 
+            # Only update after first iteration so iteration 0 displays the starting values
+            if (i > 0):
+                self.update_distances()
+            
+            self.print_acv_locations(i)
             time.sleep(1)
 
     def update_distances(self):
@@ -152,7 +155,7 @@ class DistanceSensor(Observable):
             print(acv_template.format(*acv_headers))
 
             # Headers for iteration index and alternating speed/location columns
-            detail_headers = ['Iter', 'Speed', 'Location'] + [('Speed' if i % 3 == 0 else ('Location' if i % 3 == 1 else 'Distance')) for i in range(acv_columns)]
+            detail_headers = ['Iter', 'Speed', 'Location'] + [('Distance' if i % 3 == 0 else ('Speed' if i % 3 == 1 else 'Location')) for i in range(acv_columns)]
             print(template.format(*detail_headers))
 
             # Print divider
@@ -165,7 +168,7 @@ class DistanceSensor(Observable):
 
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
         lead_acv_col = [speeds[0], locations[0]]
-        trailing_acv_cols = list(itertools.chain.from_iterable([[speeds[i], locations[i], distances[i]] for i in range(1, len(self.acvs))]))
+        trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
         column_aggregate = template.format(iteration, *lead_acv_col, *trailing_acv_cols)
 
         if (iteration in self.iterations_to_mod):
