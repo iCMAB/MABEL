@@ -1,4 +1,4 @@
-import pandas, time
+import pandas, time, subject, random
 
 from subject.Observable import Observable
 from subject.ACV import ACV
@@ -8,6 +8,16 @@ class DistanceSensor(Observable):
     def __init__(self):
         super().__init__()
         self.acvs = list()
+        self.iteration = 0
+        self.iterations_to_mod = self.calculate_mod_iterations()
+
+    def calculate_mod_iterations(self) -> list:
+        num_iterations = subject.ITERATIONS
+        mod_percent = subject.PERCENT_MODIFIED
+        num_modded = round(num_iterations * mod_percent) # Floors the decimal value for all positive numbers
+
+        mod_iterations = random.sample(range(0, num_iterations), num_modded)
+        return mod_iterations
 
     def read_data(self):
         data = pandas.read_csv('data/acv_start.csv')
@@ -19,12 +29,10 @@ class DistanceSensor(Observable):
         self.run_update_loop()
 
     def run_update_loop(self):
-        index = 0
-        
-        while True:
-            self.print_acv_locations(index)
+        for i in range(subject.ITERATIONS):
+            self.iteration = i
+            self.print_acv_locations(i)
             self.update_distances()
-            index += 1
 
             time.sleep(1)
 
@@ -39,12 +47,16 @@ class DistanceSensor(Observable):
                 knowledge.target_speed = acv.speed
                 continue
 
-            distances.append(self.acvs[index - 1].location - acv.location)
+            distance = self.mod_distance(self.acvs[index - 1].location - acv.location)
+
+            distances.append(distance)
             speeds.append(acv.speed)
         
         self.notify(distances, speeds)
     
-    
+    def mod_distance(self, distance) -> float:
+        return distance
+
     def recieve_speed_modifications(self, speed_modifiers: list):
         for (index, acv) in enumerate(self.acvs):
             if index == 0:
@@ -61,6 +73,9 @@ class DistanceSensor(Observable):
         template = " | ".join(['{:>4}'] + ['{:^8}' for _ in range(acv_columns)])
 
         if index == 0:
+            # Print out which iterations will be modified
+            print("Modifying iterations: " + str(self.iterations_to_mod) + "\n")
+
             # Header for ACV index (ACV1, ACV2, etc.)
             acv_headers = [''] + ['ACV' + str(acv.index + 1) for acv in self.acvs]
 
@@ -83,4 +98,8 @@ class DistanceSensor(Observable):
             speeds.append(acv.speed)
 
         # Print index and alternating location/speed columns for the respective ACV (// is floor division)
-        print(template.format(index, *[locations[i // 2] if i % 2 == 0 else speeds[i // 2] for i in range(acv_columns)]))
+        column = template.format(index, *[locations[i // 2] if i % 2 == 0 else speeds[i // 2] for i in range(acv_columns)]) 
+        if (index in self.iterations_to_mod):
+            column += " <--- MODIFIED"
+
+        print(column)

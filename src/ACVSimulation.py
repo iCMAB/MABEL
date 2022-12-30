@@ -1,3 +1,5 @@
+import subject
+
 from mapek.Knowledge import Knowledge
 from mapek.Monitor import Monitor
 from mapek.Analyzer import Analyzer
@@ -7,7 +9,7 @@ from subject.DistanceSensor import DistanceSensor
 
 def run_simulation():
     knowledge = Knowledge()
-    knowledge.ideal_distance = 5
+    knowledge.ideal_distance = subject.IDEAL_DISTANCE
 
     sensor = DistanceSensor()
 
