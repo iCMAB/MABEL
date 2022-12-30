@@ -10,11 +10,10 @@ class Analyzer(Component):
 
     def execute(self, distances: list):
         knowledge = Knowledge()
-
         target_speed = knowledge.target_speed
         ideal_distance = knowledge.ideal_distance
+
         speeds = list()
-        
         for distance in distances:
             current_Speed = target_speed + (distance - ideal_distance)
             speeds.append(current_Speed)

@@ -59,6 +59,7 @@ class DistanceSensor(Observable):
             distances.append(distance)
             speeds.append(acv.speed)
         
+        # Send distance and speed data for all ACVs except lead to MAPE-K loop
         self.notify(distances, speeds)
     
     def mod_distance(self, distance) -> float:
@@ -70,6 +71,7 @@ class DistanceSensor(Observable):
 
     def recieve_speed_modifications(self, speed_modifiers: list):
         for (index, acv) in enumerate(self.acvs):
+            # Don't modify speed of lead ACV
             if index == 0:
                 acv.update(0)
                 continue
@@ -86,6 +88,7 @@ class DistanceSensor(Observable):
         if index == 0:
             # Print out which iterations will be modified
             print("=====================================")
+            print("Ideal distance: " + str(subject.IDEAL_DISTANCE))
             print("Modifying distance in iterations: \n", *["> " + str(iteration) + " (x" + str(value) + ")\n" for iteration, value in self.iterations_to_mod.items()])
 
             # Header for ACV index (ACV1, ACV2, etc.)

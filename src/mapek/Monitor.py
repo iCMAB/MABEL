@@ -8,6 +8,7 @@ class Monitor(Observer, Component):
         self.analyzer = analyzer
 
     def update(self, distances: list, starting_speeds: list):
+        # Copy info and pass to analyzer
         self.execute(distances.copy(), starting_speeds.copy())
 
     def execute(self, distances: list, starting_speeds: list):
