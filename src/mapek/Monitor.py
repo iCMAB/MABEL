@@ -4,9 +4,16 @@ from mapek.Observer import Observer
 from mapek.Component import Component
 
 class Monitor(Observer, Component):
+    """
+    The MAPE-K loop monitor component.
+    
+    Attributes:
+        analyzer (Analyzer): The analyzer component of the MAPE-K loop
+    """
+
     def __init__(self, analyzer: Analyzer):
         """Initializes the MAPE-K loop monitor with the analyzer."""
-        
+
         self.analyzer = analyzer
 
     def update(self, distances: list, starting_speeds: list):

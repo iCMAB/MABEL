@@ -1,4 +1,12 @@
 class ACV:
+    """Represents an Autonomously Controlled Vehicle (ACV). Travels in one dimension.
+    
+    Attributes:
+        index (int): The index of the ACV.
+        location (float): The current location of the ACV.
+        speed (float): The current speed of the ACV.
+    """
+
     def __init__(self, index: int, start_location: float, start_speed: float):
         """
         Initializes the ACV with the given index, location, and speed.
@@ -10,24 +18,8 @@ class ACV:
         """
 
         self.index = index
-        self._location = start_location
-        self._speed = start_speed  
-
-    @property
-    def location(self):
-        return self._location
-
-    @location.setter
-    def location(self, value):
-        self._location = value
-
-    @property
-    def speed(self):
-        return self._speed
-
-    @speed.setter
-    def speed(self, value):
-        self._speed = value
+        self.location = start_location
+        self.speed = start_speed  
 
     def update(self, speed_modifier):
         """
@@ -36,6 +28,6 @@ class ACV:
         Args:
             speed_modifier (float): The speed modifier to apply to the ACV.
         """
-        
+
         self.speed += speed_modifier
         self.location += self.speed

@@ -1,4 +1,13 @@
 class Knowledge:
+    """
+    The knowledge component of the MAPE-K loop.
+    
+    Attributes:
+        target_speed (int): The target speed for the ACVs
+        ideal_distance (int): The ideal distance for the ACVs
+        starting_speeds (list): List of starting speeds for each relevant ACV
+    """
+
     __instance = None
 
     target_speed = None

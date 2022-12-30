@@ -5,9 +5,16 @@ from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 
 class Analyzer(Component):
+    """
+    The MAPE-K loop analyzer component.
+
+    Attributes:
+        planner (Planner): The planner component of the MAPE-K loop
+    """
+
     def __init__(self, planner: Planner):
         """Initializes the MAPE-K loop analyzer with the planner."""
-        
+
         self.planner = planner
 
     def execute(self, distances: list):

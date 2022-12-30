@@ -1,6 +1,13 @@
 from mapek.Component import Component
 
 class Observable:
+    """
+    An observable class for the observer pattern that can be subscribed to and notified of changes
+    
+    Attributes:
+        subscribers (set): A set of all subscribers to the observable
+    """
+
     def __init__(self):
         """Initialize the observable with an empty set of subscribers"""
         self.subscribers = set()

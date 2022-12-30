@@ -4,6 +4,13 @@ from mapek.Knowledge import Knowledge
 from subject.DistanceSensor import DistanceSensor
 
 class Executer(Component):
+    """
+    The MAPE-K loop executer component.
+
+    Attributes:
+        sensor (DistanceSensor): The distance sensor to send adaptation information back to.
+    """
+
     def __init__(self, sensor: DistanceSensor):
         """Initializes the MAPE-K loop executer with the distance sensor."""
 
@@ -16,5 +23,5 @@ class Executer(Component):
         Args:
             speed_modifiers (list): List of speed modifiers for each relevant ACV
         """
-        
+
         self.sensor.recieve_speed_modifications(speed_modifiers)

@@ -3,6 +3,12 @@ from mapek.Executer import Executer
 from mapek.Knowledge import Knowledge
 
 class Planner(Component):
+    """The MAPE-K loop planner component.
+    
+    Attributes:
+        executer (Executer): The executer component of the MAPE-K loop
+    """
+
     def __init__(self, executer: Executer):
         """Initializes the MAPE-K loop planner with the executer."""
 

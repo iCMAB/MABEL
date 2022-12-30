@@ -5,6 +5,15 @@ from subject.ACV import ACV
 from mapek.Knowledge import Knowledge
 
 class DistanceSensor(Observable):
+    """
+    Represents the distance sensor of an ACV. Serves as the intermediary between the ACVs and the speed adaptation MAPE-K loop
+    
+    Attributes:
+        acvs (list): List of ACVs that the distance sensor is monitoring
+        iteration (int): The current iteration of the simulation
+        iterations_to_mod (dict): A dictionary of iterations to modify and the amount to modify them by
+    """
+
     def __init__(self):
         """Initialize the DistanceSensor class."""
         super().__init__()
@@ -117,7 +126,7 @@ class DistanceSensor(Observable):
         Args:
             iteration (int): The current iteration.
         """
-        
+
         # 2 columns per ACV (location, speed)
         acv_columns = len(self.acvs) * 2
 
