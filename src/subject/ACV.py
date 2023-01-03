@@ -1,3 +1,5 @@
+import subject
+
 class ACV:
     """Represents an Autonomously Controlled Vehicle (ACV). Travels in one dimension.
     
@@ -32,4 +34,6 @@ class ACV:
         """
 
         self.speed += speed_modifier
+        self.speed = max(min(self.speed, subject.MAX_SPEED), -subject.MAX_SPEED)
+        
         self.location += self.speed
