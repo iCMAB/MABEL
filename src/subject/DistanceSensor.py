@@ -19,14 +19,14 @@ class DistanceSensor(Observable):
         super().__init__()
         self.acvs = list()
         self.iteration = 0
-        self.iterations_to_mod = self.calculate_mod_iterations()
+        self.iterations_to_mod = dict()
 
     def calculate_mod_iterations(self) -> dict:
         """
         Calculates the iterations that will be modified and the amount to modify them by.
         
         Returns:
-            dict: A dictionary of iterations to modify and the amount to modify them by.
+            dict: A dictionary of iterations to modify as keys and the ACV to modify as well as amount to modify them by as the values.
         """
 
         num_iterations = subject.ITERATIONS
@@ -36,7 +36,10 @@ class DistanceSensor(Observable):
         mod_iterations = random.sample(range(0, num_iterations), num_modded)
         iteration_mod_pair = {
             iteration:
-            round(random.uniform(subject.MOD_RANGE[0], subject.MOD_RANGE[1]), 2)
+            (
+                random.randint(1, len(self.acvs) - 1), # ACV index
+                round(random.uniform(subject.MOD_RANGE[0], subject.MOD_RANGE[1]), 2) # Mod amount
+            )
             for iteration in mod_iterations
         }
 
@@ -52,6 +55,7 @@ class DistanceSensor(Observable):
         for index, row in data.iterrows():
             self.acvs.append(ACV(int(row['acv_index']), float(row['location']), float(row['speed'])))
 
+        self.iterations_to_mod = self.calculate_mod_iterations()
         self.run_update_loop()
 
     def run_update_loop(self):
@@ -65,7 +69,6 @@ class DistanceSensor(Observable):
                 self.update_distances()
             
             self.print_acv_locations(i)
-            #time.sleep(1)
 
     def update_distances(self):
         """Updates the distances between the ACVs and sends the data to the MAPE-K loop to determine speed adaptation."""
@@ -80,7 +83,7 @@ class DistanceSensor(Observable):
                 knowledge.target_speed = acv.speed
                 continue
 
-            distance = self.mod_distance(self.acvs[index - 1].location - acv.location)
+            distance = self.mod_distance(self.acvs[index - 1].location - acv.location, index)
             acv.distance = distance
 
             distances.append(distance)
@@ -89,21 +92,22 @@ class DistanceSensor(Observable):
         # Send distance and speed data for all ACVs except lead to MAPE-K loop
         self.notify(distances, speeds)
     
-    def mod_distance(self, distance) -> float:
+    def mod_distance(self, distance, index) -> float:
         """
         Determines if a distance should be modified based on the current iteration and returns the modified distance.
         Does nothing if the distance should not be modified.
 
         Args:
             distance (float): The distance to be modified.
+            index (int): The index of the ACV that the distance is for.
 
         Returns:
             float: The modified distance.
         """
 
         modded_distance = distance
-        if self.iteration in self.iterations_to_mod.keys():
-            modded_distance = distance * self.iterations_to_mod[self.iteration]
+        if self.iteration in self.iterations_to_mod.keys() and self.iterations_to_mod[self.iteration][0] == index:
+            modded_distance = distance * self.iterations_to_mod[self.iteration][1]
         
         return modded_distance
 
@@ -162,10 +166,12 @@ class DistanceSensor(Observable):
             # Print out ideal distance and which iterations will be modified
             print("=====================================\n")
             print("Ideal distance: " + str(subject.IDEAL_DISTANCE))
-            print("Modifying distance in iterations: \n", *["> " + str(iteration) + " (x" + str(value) + ")\n" for iteration, value in self.iterations_to_mod.items()])
+            print("Modifying distance in iterations: ", *["\n> " + str(iteration) + " (ACV" + str(value[0]) + " | " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
+
+            input()
 
             # Header for ACV index (ACV1, ACV2, etc.)
-            acv_headers = [''] + ['ACV' + str(acv.index + 1) for acv in self.acvs]
+            acv_headers = [''] + ['ACV' + str(acv.index) for acv in self.acvs]
 
             # Lead ACV column is 19 wide (2 8-wide columns + 1 3-character divider)
             # All other ACV columns are 30 wide (3 8-wide columns + 2 3-character dividers)
@@ -194,10 +200,12 @@ class DistanceSensor(Observable):
         distance_mod_flag = ""
         crash_flag = ""
         if (iteration in self.iterations_to_mod):
-            distance_mod_flag = " <-- DISTANCE MODIFIED (" + str(self.iterations_to_mod[iteration]) + "x)"
+            mod_values = self.iterations_to_mod[iteration]
+            distance_mod_flag = " <-- DISTANCE MODIFIED (ACV" + str(mod_values[0]) + " | " + str(mod_values[1]) + "x)"
 
         if (crash_list != []):
             separator = " : " if distance_mod_flag != "" else " <-- "
             crash_flag = separator + "CRASH DETECTED " + "".join(["(ACV" + str(crash[0]) + " and ACV" + str(crash[1]) + ")" for crash in crash_list]) 
 
-        print(column_aggregate + distance_mod_flag + crash_flag)
+        print(column_aggregate + distance_mod_flag + crash_flag, end='')
+        input()
