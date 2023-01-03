@@ -24,4 +24,8 @@ class Executer(Component):
             speed_modifiers (list): List of speed modifiers for each relevant ACV
         """
 
-        self.sensor.recieve_speed_modifications(speed_modifiers)
+        knowledge = Knowledge()
+        confidences = knowledge.confidences
+        predicted_modifiers = knowledge.predicted_modifiers
+
+        self.sensor.recieve_speed_modifications(speed_modifiers, confidences, predicted_modifiers)

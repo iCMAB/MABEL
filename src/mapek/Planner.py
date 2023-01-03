@@ -25,8 +25,13 @@ class Planner(Component):
         starting_speeds = knowledge.starting_speeds
 
         # Speed modifier will be added to current ACV speed to get the desired speed
-        speed_modifiers = list()
+        actual_modifiers = list()
+        predicted_modifiers = list()
         for (index, new_speed) in enumerate(new_speeds):
-            speed_modifiers.append(new_speed - starting_speeds[index])
+            actual_modifiers.append(new_speed - starting_speeds[index])
+            
+            # Predict no change if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
+            predicted_modifiers.append(0) 
 
-        self.executer.execute(speed_modifiers)
+        knowledge.predicted_modifiers = predicted_modifiers.copy()
+        self.executer.execute(actual_modifiers)

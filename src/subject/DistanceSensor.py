@@ -111,7 +111,7 @@ class DistanceSensor(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, speed_modifiers: list):
+    def recieve_speed_modifications(self, actual_modifiers: list, confidences: list, predicted_modifiers: list):
         """
         Updates each ACV with speed modifications
         
@@ -119,14 +119,20 @@ class DistanceSensor(Observable):
             speed_modifiers (list): A list of speed modifiers to apply to each ACV.
         """
 
+        confidence_threshold = 0.5
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV
             if index == 0:
                 acv.update(0)
                 continue
 
-            acv.update(speed_modifiers[index - 1])
-    
+            i = index - 1
+            modify_val = actual_modifiers[i]
+            if (confidences[i] < confidence_threshold):
+                modify_val = predicted_modifiers[i]
+
+            acv.update(modify_val)
+
     def detect_crashes(self):
         """
         Checks if an ACV has crashed into another ACV.

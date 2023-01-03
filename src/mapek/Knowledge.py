@@ -13,6 +13,8 @@ class Knowledge:
     target_speed = None
     ideal_distance = None
     starting_speeds = None
+    confidences = list()
+    predicted_modifiers = list()
 
     def __new__(cls, *args):
         """Creates a singleton instance of the Knowledge class."""

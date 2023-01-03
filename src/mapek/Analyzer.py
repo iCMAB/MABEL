@@ -30,9 +30,13 @@ class Analyzer(Component):
         ideal_distance = knowledge.ideal_distance
 
         speeds = list()
+        confidences = list()
         for distance in distances:
             current_Speed = target_speed + (distance - ideal_distance)
             speeds.append(current_Speed)
 
+            confidences.append(1)   # In the future, the ML model will determine the confidence value
+
+        knowledge.confidences = confidences.copy()
         self.planner.execute(speeds)
         
