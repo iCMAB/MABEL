@@ -1,4 +1,4 @@
-import pandas, time, subject, random, itertools
+import pandas, subject, random, itertools
 
 from subject.Observable import Observable
 from subject.ACV import ACV
@@ -53,7 +53,10 @@ class DistanceSensor(Observable):
 
         # Initialize ACVs
         for index, row in data.iterrows():
-            self.acvs.append(ACV(int(row['acv_index']), float(row['location']), float(row['speed'])))
+            self.acvs.append(ACV(index, float(row['start_location']), float(row['start_speed'])))
+
+        if (len(self.acvs) <= 1):
+            raise Exception('Please initialize 2 or more ACVs with unique indexes from the CSV file.')
 
         self.iterations_to_mod = self.calculate_mod_iterations()
         self.run_update_loop()
@@ -147,7 +150,7 @@ class DistanceSensor(Observable):
                 continue
 
             if acv.location > self.acvs[index - 1].location:
-                crash_list.append((index, index - 1))
+                crash_list.append((index - 1, index))
         
         return crash_list
 
@@ -159,37 +162,43 @@ class DistanceSensor(Observable):
             iteration (int): The current iteration.
         """
 
+        column_width = 9    # Width of each column
+        iter_col_width = 4  # Iteration count column width
+
         # 3 columns per ACV (distance, speed, location) and only 2 columns for lead ACV (speed, location)
         acv_columns = (len(self.acvs) - 1) * 3
 
         # Iteration column is 4 wide, each location/speed column is 8 wide. Format makes it so each ACV is divided by || and each individual column is divided by |
-        spacings = ['{:>4}', '{:^8}', '{:^8}'] + ['{:^8}' for _ in range(acv_columns)]
-        template = [spacings[0] + " || " + spacings[1] + " | " + spacings[2]]     # Iter + lead ACV columns
-        template += [" || " + " | ".join(spacings[3*i:3*i+3]) for i in range(1, (acv_columns // 3) + 1)]  # All other ACV columns
+        spacings = ['{:>{iter}}', '{:^{width}}', '{:^{width}}'] + ['{:^{width}}' for _ in range(acv_columns)]
+        template = [spacings[0] + "||" + spacings[1] + "|" + spacings[2]]     # Iter + lead ACV columns
+        template += ["||" + "|".join(spacings[3*i:3*i+3]) for i in range(1, (acv_columns // 3) + 1)]  # All other ACV columns
         template = "".join(template)
 
         if iteration == 0:
             # Print out ideal distance and which iterations will be modified
             print("=====================================\n")
-            print("Ideal distance: " + str(subject.IDEAL_DISTANCE))
-            print("Modifying distance in iterations: ", *["\n> " + str(iteration) + " (ACV" + str(value[0]) + " | " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
+            print("• ACV Count: " + str(len(self.acvs)))
+            print("• Ideal distance: " + str(subject.IDEAL_DISTANCE))
+            print("• Distance modification iterations: ", *["\n   > " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
+            print("\nPress enter to continue...", end='')
             input()
+            print()
 
             # Header for ACV index (ACV1, ACV2, etc.)
             acv_headers = [''] + ['ACV' + str(acv.index) for acv in self.acvs]
 
-            # Lead ACV column is 19 wide (2 8-wide columns + 1 3-character divider)
-            # All other ACV columns are 30 wide (3 8-wide columns + 2 3-character dividers)
-            acv_template = " || ".join(['{:>4}', '{:^19}'] + ['{:^30}' for _ in range(len(self.acvs) - 1)])
-            print(acv_template.format(*acv_headers))
+            # Lead ACV column is 19 wide (2 6-wide columns + 1 1-character divider)
+            # All other ACV columns are 30 wide (3 5-wide columns + 2 1-character dividers)
+            acv_template = "||".join(['{:>{iter}}', '{:^{lead_acv}}'] + ['{:^{acv}}' for _ in range(len(self.acvs) - 1)])
+            print(acv_template.format(*acv_headers, iter=iter_col_width, lead_acv=(column_width * 2 + 1), acv=(column_width * 3 + 2)))
 
             # Headers for iteration index and alternating speed/location columns
-            detail_headers = ['Iter', 'Speed', 'Location'] + [('Distance' if i % 3 == 0 else ('Speed' if i % 3 == 1 else 'Location')) for i in range(acv_columns)]
-            print(template.format(*detail_headers))
+            detail_headers = ['Iter', 'Spd', 'Loc'] + [('Dst' if i % 3 == 0 else ('Spd' if i % 3 == 1 else 'Loc')) for i in range(acv_columns)]
+            print(template.format(*detail_headers, iter=iter_col_width, width=column_width))
 
             # Print divider
-            print(template.replace(" ", "-").replace(":", ":-").replace("|", "+").format(*['', '', ''] + ['' for _ in range(acv_columns)]))
+            print(template.replace(" ", "-").replace(":", ":-").replace("|", "+").format(*['', '', ''] + ['' for _ in range(acv_columns)], iter=iter_col_width, width=column_width))
 
         # Get locations and speeds for each ACV
         locations = [round(acv.location, 2) for acv in self.acvs]
@@ -200,18 +209,21 @@ class DistanceSensor(Observable):
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
         lead_acv_col = [speeds[0], locations[0]]
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
-        column_aggregate = template.format(iteration, *lead_acv_col, *trailing_acv_cols)
+        column_aggregate = template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=iter_col_width, width=column_width)
 
         # Handle distance modification and crash flags
-        distance_mod_flag = ""
-        crash_flag = ""
+        flags = ""
         if (iteration in self.iterations_to_mod):
             mod_values = self.iterations_to_mod[iteration]
-            distance_mod_flag = " <-- DISTANCE MODIFIED (ACV" + str(mod_values[0]) + " | " + str(mod_values[1]) + "x)"
+            flags += "DISTANCE MODIFICATION (ACV" + str(mod_values[0]) + ", " + str(mod_values[1]) + "x)"
 
         if (crash_list != []):
-            separator = " : " if distance_mod_flag != "" else " <-- "
-            crash_flag = separator + "CRASH DETECTED " + "".join(["(ACV" + str(crash[0]) + " and ACV" + str(crash[1]) + ")" for crash in crash_list]) 
+            separator = " : " if flags != "" else ""
+            flags += separator + "CRASH " + "".join(["(ACV" + str(crash[0]) + " + ACV" + str(crash[1]) + ")" for crash in crash_list]) 
 
-        print(column_aggregate + distance_mod_flag + crash_flag, end='')
+        if (flags != ""):
+            flags = "\n*** ITERATION " + str(iteration) + " FLAGS: " + flags 
+
+        print(
+         column_aggregate + flags, end='')
         input()

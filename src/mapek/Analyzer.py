@@ -1,5 +1,3 @@
-import numpy
-
 from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
