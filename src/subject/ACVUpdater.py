@@ -21,6 +21,7 @@ class ACVUpdater(Observable):
         self.acvs = list()
         self.iteration = 0
         self.iterations_to_mod = dict()
+        self.total_crashes = 0
 
     def calculate_mod_iterations(self) -> dict:
         """
@@ -75,7 +76,7 @@ class ACVUpdater(Observable):
             
             logger.print_acv_locations(i, self.detect_crashes())
 
-        logger.print_final_metrics()
+        logger.print_final_metrics(self.total_crashes)
 
     def update_distances(self):
         """Updates the distances between the ACVs and sends the data to the MAPE-K loop to determine speed adaptation."""
@@ -156,5 +157,6 @@ class ACVUpdater(Observable):
             if acv.location > self.acvs[index - 1].location:
                 crash_list.append((index - 1, index))
         
+        self.total_crashes += len(crash_list)
         return crash_list
 

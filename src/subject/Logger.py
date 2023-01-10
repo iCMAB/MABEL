@@ -81,8 +81,9 @@ class Logger:
         print(table_template.replace(" ", "-").replace(":", ":-").replace("|", "+")
             .format(*['', '', ''] + ['' for _ in range(self.num_acv_columns)], iter=self.iter_col_width, width=self.column_width))
 
-    def print_final_metrics(self):
+    def print_final_metrics(self, crashes: int):
         print("\n=====================================")
-        print ("\nTotal penalties incurred: ", end='')
+        print("\nTotal crashes: " + str(crashes))
+        print ("Total penalties incurred: ", end='')
         print (*["\n• ACV" + str(acv.index) + ": " + '{0:.2f}'.format(acv.total_penalty) for acv in self.acvs])
         print()
