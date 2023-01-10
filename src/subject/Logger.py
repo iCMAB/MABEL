@@ -41,14 +41,14 @@ class Logger:
         flags = ""
         if (iteration in self.iterations_to_mod):
             mod_values = self.iterations_to_mod[iteration]
-            flags += "DISTANCE MODIFICATION (ACV" + str(mod_values[0]) + ", " + str(mod_values[1]) + "x)"
+            flags += "ACV" + str(mod_values[0]) + " Dst x" + str(mod_values[1])
 
         if (crash_list != []):
             separator = " : " if flags != "" else ""
-            flags += separator + "CRASH " + "".join(["(ACV" + str(crash[0]) + " + ACV" + str(crash[1]) + ")" for crash in crash_list]) 
+            flags += separator + "CRASH " + "".join(["(ACV" + str(crash[0]) + ", ACV" + str(crash[1]) + ")" for crash in crash_list]) 
 
         if (flags != ""):
-            flags = "\n*** ITERATION " + str(iteration) + " FLAGS: " + flags 
+            flags = "<-- " + flags 
 
         print(
          column_aggregate + flags, end='')
