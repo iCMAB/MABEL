@@ -27,5 +27,6 @@ class Executer(Component):
         knowledge = Knowledge()
         confidences = knowledge.confidences
         predicted_modifiers = knowledge.predicted_modifiers
+        penalties = knowledge.penalties
 
-        self.sensor.recieve_speed_modifications(speed_modifiers, confidences, predicted_modifiers)
+        self.sensor.recieve_speed_modifications(speed_modifiers, confidences, predicted_modifiers, penalties)

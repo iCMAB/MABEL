@@ -29,12 +29,15 @@ class Analyzer(Component):
 
         speeds = list()
         confidences = list()
+        penalties = list()
         for distance in distances:
             current_Speed = target_speed + (distance - ideal_distance)
             speeds.append(current_Speed)
 
             confidences.append(1)   # In the future, the ML model will determine the confidence value
+            penalties.append(pow(abs(distance - ideal_distance), 2)) # Penalty (P) = variation (V) from desired ^2 → P = V^2
 
         knowledge.confidences = confidences.copy()
+        knowledge.penalties = penalties.copy()
         self.planner.execute(speeds)
         

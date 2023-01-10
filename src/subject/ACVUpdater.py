@@ -75,7 +75,7 @@ class ACVUpdater(Observable):
             
             logger.print_acv_locations(i, self.detect_crashes())
 
-        # self.print_final_metrics()
+        logger.print_final_metrics()
 
     def update_distances(self):
         """Updates the distances between the ACVs and sends the data to the MAPE-K loop to determine speed adaptation."""
@@ -118,7 +118,7 @@ class ACVUpdater(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, actual_modifiers: list, confidences: list, predicted_modifiers: list):
+    def recieve_speed_modifications(self, actual_modifiers: list, confidences: list, predicted_modifiers: list, penalties: list):
         """
         Updates each ACV with speed modifications
         
@@ -130,7 +130,7 @@ class ACVUpdater(Observable):
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV
             if index == 0:
-                acv.update(0)
+                acv.update(0, 0)
                 continue
 
             i = index - 1
@@ -138,7 +138,7 @@ class ACVUpdater(Observable):
             if (confidences[i] < confidence_threshold):
                 modify_val = predicted_modifiers[i]
 
-            acv.update(modify_val)
+            acv.update(modify_val, penalties[i])
 
     def detect_crashes(self):
         """
