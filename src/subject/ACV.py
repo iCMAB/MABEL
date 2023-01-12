@@ -25,8 +25,9 @@ class ACV:
         self.speed = start_speed  
         self.distance = 0
         self.total_penalty = 0
+        self.total_regret = 0
 
-    def update(self, speed_modifier, penalty):
+    def update(self, speed_modifier, penalty, regret):
         """
         Updates the ACV's speed and location based on the given speed modifier.
 
@@ -36,6 +37,7 @@ class ACV:
         """
 
         self.total_penalty += penalty
+        self.total_regret += regret
 
         self.speed += speed_modifier
         self.speed = max(min(self.speed, subject.MAX_SPEED), -subject.MAX_SPEED)

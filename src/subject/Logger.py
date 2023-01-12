@@ -112,8 +112,15 @@ class Logger:
             .format(*['', '', ''] + ['' for _ in range(self.num_acv_columns)], iter=self.iter_col_width, width=self.column_width))
 
     def print_final_metrics(self, crashes: int):
+        def round_two_decimals(value: float) -> str:
+            return '{0:.2f}'.format(value)
+
         print("\n=====================================")
+        print ("\nACV Stats: ", end='')
+        print (*["\n• ACV" + str(acv.index) + ": Penalty=" + round_two_decimals(acv.total_penalty) + ", Regret=" + round_two_decimals(acv.total_regret) for acv in self.acvs])
+        
         print("\nTotal crashes: " + str(crashes))
-        print ("Total penalties incurred: ", end='')
-        print (*["\n• ACV" + str(acv.index) + ": " + '{0:.2f}'.format(acv.total_penalty) for acv in self.acvs])
+        print("Average penalty: " + round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs)))
+        print("Total regret: " + round_two_decimals(sum([acv.total_regret for acv in self.acvs])))
+        
         print()

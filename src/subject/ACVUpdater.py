@@ -91,10 +91,13 @@ class ACVUpdater(Observable):
                 knowledge.target_speed = acv.speed
                 continue
 
-            distance = self.mod_distance(self.acvs[index - 1].location - acv.location, index)
-            acv.distance = distance
+            actual_distance = self.acvs[index - 1].location - acv.location
 
-            distances.append(distance)
+            # Represents bad sensor reading modification
+            modded_distance = self.mod_distance(actual_distance, index) 
+            acv.distance = modded_distance
+
+            distances.append((actual_distance, modded_distance))
             speeds.append(acv.speed)
         
         # Send distance and speed data for all ACVs except lead to MAPE-K loop
@@ -119,7 +122,7 @@ class ACVUpdater(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, actual_modifiers: list, confidences: list, predicted_modifiers: list, penalties: list):
+    def recieve_speed_modifications(self, actual_modifiers: list, confidences: list, predicted_modifiers: list, penalties: list, regrets: list):
         """
         Updates each ACV with speed modifications
         
@@ -131,7 +134,7 @@ class ACVUpdater(Observable):
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV
             if index == 0:
-                acv.update(0, 0)
+                acv.update(0, 0, 0)
                 continue
 
             i = index - 1
@@ -139,7 +142,7 @@ class ACVUpdater(Observable):
             if (confidences[i] < confidence_threshold):
                 modify_val = predicted_modifiers[i]
 
-            acv.update(modify_val, penalties[i])
+            acv.update(modify_val, penalties[i], regrets[i])
 
     def detect_crashes(self):
         """
