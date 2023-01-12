@@ -157,7 +157,7 @@ class ACVUpdater(Observable):
             if index == 0:
                 continue
 
-            if acv.location > self.acvs[index - 1].location:
+            if acv.location >= self.acvs[index - 1].location:
                 crash_list.append((index - 1, index))
         
         self.total_crashes += len(crash_list)

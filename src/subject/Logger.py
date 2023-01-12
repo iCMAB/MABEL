@@ -124,8 +124,8 @@ class Logger:
         headers=["ACV Index", "Penalty", "Regret"]
         print(tabulate(table, headers, tablefmt="presto"))
         
-        print("\nTotal crashes: " + str(crashes))
-        print("Average penalty: " + round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs)))
-        print("Total regret: " + round_two_decimals(sum([acv.total_regret for acv in self.acvs])))
+        print("\n• Total crashes: " + str(crashes))
+        print("• Average penalty: " + round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs)))
+        print("• Total regret: " + round_two_decimals(sum([acv.total_regret for acv in self.acvs])))
         
         print()
