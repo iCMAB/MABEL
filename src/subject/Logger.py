@@ -1,5 +1,7 @@
 import subject, itertools, colorama
 
+from tabulate import tabulate
+
 class Logger:
 
     MODIFIED_DST_COLOR = colorama.Back.YELLOW
@@ -89,6 +91,7 @@ class Logger:
         print("=====================================\n")
         print("• ACV Count: " + str(len(self.acvs)))
         print("• Ideal distance: " + str(subject.IDEAL_DISTANCE))
+        print("• Total Iterations: " + str(subject.ITERATIONS))
         print("• Distance modification iterations: ", 
             *["\n   > " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
@@ -115,9 +118,11 @@ class Logger:
         def round_two_decimals(value: float) -> str:
             return '{0:.2f}'.format(value)
 
-        print("\n=====================================")
-        print ("\nACV Stats: ", end='')
-        print (*["\n• ACV" + str(acv.index) + ": Penalty=" + round_two_decimals(acv.total_penalty) + ", Regret=" + round_two_decimals(acv.total_regret) for acv in self.acvs])
+        print("\n=====================================\n")
+
+        table=[[acv.index, round_two_decimals(acv.total_penalty), round_two_decimals(acv.total_regret)] for acv in self.acvs]
+        headers=["ACV Index", "Penalty", "Regret"]
+        print(tabulate(table, headers, tablefmt="presto"))
         
         print("\nTotal crashes: " + str(crashes))
         print("Average penalty: " + round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs)))
