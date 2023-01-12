@@ -9,6 +9,7 @@ from subject.ACVUpdater import ACVUpdater
 
 def run_simulation():
     """Runs the ACV simulation."""
+    
     knowledge = Knowledge()
     knowledge.ideal_distance = subject.IDEAL_DISTANCE
 

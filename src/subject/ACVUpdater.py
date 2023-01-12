@@ -13,10 +13,12 @@ class ACVUpdater(Observable):
         acvs (list): List of ACVs that the distance sensor is monitoring
         iteration (int): The current iteration of the simulation
         iterations_to_mod (dict): A dictionary of iterations to modify and the amount to modify them by
+        total_crashes (int): The total number of crashes that have occurred
     """
 
     def __init__(self):
         """Initialize the ACVUpdater class."""
+
         super().__init__()
         self.acvs = list()
         self.iteration = 0
@@ -65,6 +67,7 @@ class ACVUpdater(Observable):
 
     def run_update_loop(self):
         """Runs the update loop for the distance sensor."""
+
         logger = Logger(self.acvs, self.iterations_to_mod)
 
         for i in range(subject.ITERATIONS + 1):
@@ -122,12 +125,16 @@ class ACVUpdater(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, actual_modifiers: list, confidences: list, predicted_modifiers: list, penalties: list, regrets: list):
+    def recieve_speed_modifications(self, actual_modifiers: list, predicted_modifiers: list, confidences: list, penalties: list, regrets: list):
         """
         Updates each ACV with speed modifications
         
         Args:
-            speed_modifiers (list): A list of speed modifiers to apply to each ACV.
+            actual_modifiers (list): A list of computed speed modifiers to apply to each ACV in a normal circumstance.
+            predicted_modifiers (list): A list of predicted speed modifiers to apply to each ACV if confidence value is too low.
+            confidences (list): A list of confidence values for the speed modifiers.
+            penalties (list): A list of penalties for each ACV in this iteration.
+            regrets (list): A list of regrets for each ACV in this iteration.
         """
 
         confidence_threshold = 0.5
@@ -144,7 +151,7 @@ class ACVUpdater(Observable):
 
             acv.update(modify_val, penalties[i], regrets[i])
 
-    def detect_crashes(self):
+    def detect_crashes(self) -> list:
         """
         Checks if an ACV has crashed into another ACV.
 
@@ -157,7 +164,7 @@ class ACVUpdater(Observable):
             if index == 0:
                 continue
 
-            if acv.location >= self.acvs[index - 1].location:
+            if acv.distance >= self.acvs[index - 1].location:
                 crash_list.append((index - 1, index))
         
         self.total_crashes += len(crash_list)

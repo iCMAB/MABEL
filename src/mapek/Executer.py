@@ -12,7 +12,12 @@ class Executer(Component):
     """
 
     def __init__(self, sensor: ACVUpdater):
-        """Initializes the MAPE-K loop executer with the distance sensor."""
+        """
+        Initializes the MAPE-K loop executer with the distance sensor.
+        
+        Args:
+            sensor (ACVUpdater): The distance sensor to send adaptation information back to.
+        """
 
         self.sensor = sensor
 
@@ -25,9 +30,10 @@ class Executer(Component):
         """
 
         knowledge = Knowledge()
+
         confidences = knowledge.confidences
         predicted_modifiers = knowledge.predicted_modifiers
         penalties = knowledge.penalties
         regrets = knowledge.regrets
 
-        self.sensor.recieve_speed_modifications(speed_modifiers, confidences, predicted_modifiers, penalties, regrets)
+        self.sensor.recieve_speed_modifications(speed_modifiers, predicted_modifiers, confidences, penalties, regrets)

@@ -8,6 +8,8 @@ class ACV:
         location (float): The current location of the ACV.
         speed (float): The current speed of the ACV.
         distance (float): The distance between the ACV and the ACV in front of it.
+        total_penalty (float): The total penalty incurred by the ACV.
+        total_regret (float): The total regret of the ACV.
     """
 
     def __init__(self, index: int, start_location: float, start_speed: float):
@@ -34,6 +36,7 @@ class ACV:
         Args:
             speed_modifier (float): The speed modifier to apply to the ACV.
             penalty (float): The penalty incurred in this iteration
+            regret (float): The regret incurred in this iteration
         """
 
         self.total_penalty += penalty
