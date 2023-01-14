@@ -71,4 +71,10 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
-        return pow(distance - ideal_distance, 2)
+        penalty = pow(distance - ideal_distance, 2)
+
+        # A very large penalty is also incurred if the vehicles collide
+        if (distance <= 0):
+            penalty = 1000000 
+        
+        return penalty
