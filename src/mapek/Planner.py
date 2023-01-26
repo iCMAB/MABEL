@@ -14,24 +14,49 @@ class Planner(Component):
 
         self.executer = executer
 
-    def execute(self, new_speeds: list):
+    def execute(self, new_speeds: list, penalties: list, confidences: list):
         """
-        Calculates what to modify the current ACV speeds by to reach the desired speeds and sends it to the executer
+        Calculates what to modify the current ACV speeds by based on the confidence measurement and sends it along with the penaly and regret incurred to the executer
         
         Args:
-            new_speeds (list): List of desired speeds for each relevant ACV
+            new_speeds (list): List of desired speeds for each ACV
+            penalties (list): List of tuples containing the penalty for the distance sensor value and actual distance vlaue respectively for each ACV. 
+            confidences (list): List of confidence values for each ACV measuring the confidence in this iteration's distance sensor value 
         """
+
         knowledge = Knowledge()
         starting_speeds = knowledge.starting_speeds
 
-        # Speed modifier will be added to current ACV speed to get the desired speed
-        actual_modifiers = list()
-        predicted_modifiers = list()
-        for (index, new_speed) in enumerate(new_speeds):
-            actual_modifiers.append(new_speed - starting_speeds[index])
-            
-            # Predict no change if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
-            predicted_modifiers.append(0) 
+        confidence_threshold = 0.5  # TODO: Decide how to handle this value
 
-        knowledge.predicted_modifiers = predicted_modifiers.copy()
-        self.executer.execute(actual_modifiers)
+        # Speed modifier will be added to current ACV speed to get the desired speed
+        speed_modifiers = list()
+
+        chosen_penalties = list()
+        regrets = list()
+        acvs_ignoring_sensor = list()    # ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
+
+        for (index, new_speed) in enumerate(new_speeds):
+            sensor_penalty = penalties[index][0]
+            actual_penalty = penalties[index][1]
+
+            normal_modifier = new_speed - starting_speeds[index]
+            predicted_modifier = 0  # Predict no change if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
+
+            modifier_to_add = normal_modifier
+            penalty_to_incur = sensor_penalty
+
+            # If confidence is low enough, go with the predicted value instead of the value from the distance sensor
+            if confidences[index] < confidence_threshold:
+                modifier_to_add = predicted_modifier
+                penalty_to_incur = actual_penalty
+                acvs_ignoring_sensor.append(index + 1)   # ACV0 not counted, so add 1 to index
+            
+            # Regret (R) = modded penalty (Pm) - actual penalty (Pa) → R = Pm - Pa
+            regret = penalty_to_incur - actual_penalty
+
+            speed_modifiers.append(modifier_to_add)
+            chosen_penalties.append(penalty_to_incur)
+            regrets.append(regret)
+
+        self.executer.execute(speed_modifiers, chosen_penalties, regrets, acvs_ignoring_sensor)

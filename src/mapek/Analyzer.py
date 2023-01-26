@@ -22,41 +22,37 @@ class Analyzer(Component):
 
     def execute(self, distances: list):
         """
-        Calculates the desired speed for each ACV and sends it to the planner
+        Calculates the new speed, the potential penalties incurred, and the confidence of the distance readings for each ACV and sends them to the planner
         
         Args:
-            distances (list): List of distances from the sensors for each relevant ACV
+            distances (list): List of distances from the sensors for each ACV
         """
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
         target_speed = knowledge.target_speed
 
-        speeds = list()
+        new_speeds = list()
         confidences = list()
         penalties = list()
-        regrets = list()
 
-        for (actual_distance, modded_distance) in distances:
+        for (actual_distance, sensor_distance) in distances:
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
-            current_Speed = target_speed + (modded_distance - ideal_distance)
+            new_speed = target_speed + (sensor_distance - ideal_distance)
 
-            modded_penalty = self.calculate_penalty(modded_distance)
+            # Separate penalties for the potential bad sensor reading and the ground truth
+            sensor_penalty = self.calculate_penalty(sensor_distance)
             actual_penalty = self.calculate_penalty(actual_distance)
-
-            # Regret (R) = modded penalty (Pm) - actual penalty (Pa) → R = Pm - Pa
-            regret = modded_penalty - actual_penalty
             
-            speeds.append(current_Speed)
-            regrets.append(regret)
-            penalties.append(modded_penalty) 
-            confidences.append(1)   # In the future, the chosen ML model will determine the confidence value
+            # TODO: In the future, the chosen ML model will determine the confidence value of the distance reading.
+            # For now, ACVs are always fully confidenct that the distance is correct.
+            confidence = 1
 
-        knowledge.confidences = confidences.copy()
-        knowledge.penalties = penalties.copy()
-        knowledge.regrets = regrets.copy()
+            new_speeds.append(new_speed)
+            penalties.append((sensor_penalty, actual_penalty)) 
+            confidences.append(confidence)
 
-        self.planner.execute(speeds)
+        self.planner.execute(new_speeds, penalties, confidences)
         
     def calculate_penalty(self, distance) -> float:
         """
@@ -71,6 +67,8 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
+
+        # Penalty (P) = variation (V) from desired ^2 → P = V^2
         penalty = pow(distance - ideal_distance, 2)
 
         # A very large penalty is also incurred if the vehicles collide
