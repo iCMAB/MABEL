@@ -22,10 +22,10 @@ class Analyzer(Component):
 
     def execute(self, distances: list):
         """
-        Calculates the desired speed for each ACV and sends it to the planner
+        Calculates the new speed, the potential penalties incurred, and the confidence of the distance readings for each ACV and sends them to the planner
         
         Args:
-            distances (list): List of distances from the sensors for each relevant ACV
+            distances (list): List of distances from the sensors for each ACV
         """
 
         knowledge = Knowledge()
@@ -46,7 +46,7 @@ class Analyzer(Component):
             
             # TODO: In the future, the chosen ML model will determine the confidence value of the distance reading.
             # For now, ACVs are always fully confidenct that the distance is correct.
-            confidence = 1
+            confidence = 0 if (sensor_distance > 5 or sensor_distance < 0) else 1
 
             new_speeds.append(new_speed)
             penalties.append((sensor_penalty, actual_penalty)) 

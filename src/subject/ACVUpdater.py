@@ -127,12 +127,10 @@ class ACVUpdater(Observable):
 
     def recieve_speed_modifications(self, speed_modifiers: list, penalties: list, regrets: list):
         """
-        Updates each ACV with speed modifications
+        Updates each ACV with a speed modification, penalty, and regret
         
         Args:
-            actual_modifiers (list): A list of computed speed modifiers to apply to each ACV in a normal circumstance.
-            predicted_modifiers (list): A list of predicted speed modifiers to apply to each ACV if confidence value is too low.
-            confidences (list): A list of confidence values for the speed modifiers.
+            speed_modifiers (list): A list of speed modifiers to apply to each ACV.
             penalties (list): A list of penalties for each ACV in this iteration.
             regrets (list): A list of regrets for each ACV in this iteration.
         """

@@ -16,10 +16,12 @@ class Planner(Component):
 
     def execute(self, new_speeds: list, penalties: list, confidences: list):
         """
-        Calculates what to modify the current ACV speeds by to reach the desired speeds and sends it to the executer
+        Calculates what to modify the current ACV speeds by based on the confidence measurement and sends it along with the penaly and regret incurred to the executer
         
         Args:
-            new_speeds (list): List of desired speeds for each relevant ACV
+            new_speeds (list): List of desired speeds for each ACV
+            penalties (list): List of tuples containing the penalty for the distance sensor value and actual distance vlaue respectively for each ACV. 
+            confidences (list): List of confidence values for each ACV measuring the confidence in this iteration's distance sensor value 
         """
 
         knowledge = Knowledge()
