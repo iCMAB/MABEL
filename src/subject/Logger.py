@@ -78,6 +78,7 @@ class Logger:
         if (iteration in self.iterations_to_mod):
             mod_values = self.iterations_to_mod[iteration]  # mod_values is a tuple -> (acv_index, distance_to_modify)
 
+            # Distance is colored green if the ACV is ignoring the distance sensor value, yellow otherwise
             color = Logger.IGNORED_DST_COLOR if mod_values[0] in self.acvs_ignoring_sensor else Logger.MODIFIED_DST_COLOR
             distances[mod_values[0]] = self.modify_cell_color(distances[mod_values[0]], color)
 
