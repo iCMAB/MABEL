@@ -125,7 +125,7 @@ class ACVUpdater(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, actual_modifiers: list, predicted_modifiers: list, confidences: list, penalties: list, regrets: list):
+    def recieve_speed_modifications(self, speed_modifiers: list, penalties: list, regrets: list):
         """
         Updates each ACV with speed modifications
         
@@ -137,19 +137,14 @@ class ACVUpdater(Observable):
             regrets (list): A list of regrets for each ACV in this iteration.
         """
 
-        confidence_threshold = 0.5
         for (index, acv) in enumerate(self.acvs):
-            # Don't modify speed of lead ACV
+            # Don't modify speed of lead ACV - speed is always constant
             if index == 0:
                 acv.update(0, 0, 0)
                 continue
 
             i = index - 1
-            modify_val = actual_modifiers[i]
-            if (confidences[i] < confidence_threshold):
-                modify_val = predicted_modifiers[i]
-
-            acv.update(modify_val, penalties[i], regrets[i])
+            acv.update(speed_modifiers[i], penalties[i], regrets[i])
 
     def detect_crashes(self) -> list:
         """
