@@ -14,6 +14,7 @@ class ACVUpdater(Observable):
         iteration (int): The current iteration of the simulation
         iterations_to_mod (dict): A dictionary of iterations to modify and the amount to modify them by
         total_crashes (int): The total number of crashes that have occurred
+        acvs_ignoring_sensor (list): List of ACVs who have ignored their distance sensor reading in favor of the predicted value for the current iteration. Used for visual purposes.
     """
 
     def __init__(self):
@@ -24,6 +25,7 @@ class ACVUpdater(Observable):
         self.iteration = 0
         self.iterations_to_mod = dict()
         self.total_crashes = 0
+        self.acvs_ignoring_sensor = list()
 
     def calculate_mod_iterations(self) -> dict:
         """
@@ -77,6 +79,7 @@ class ACVUpdater(Observable):
             if (i > 0):
                 self.update_distances()
             
+            logger.acvs_ignoring_sensor = self.acvs_ignoring_sensor
             logger.print_acv_locations(i, self.detect_crashes())
 
         logger.print_final_metrics(self.total_crashes)
@@ -125,7 +128,7 @@ class ACVUpdater(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, speed_modifiers: list, penalties: list, regrets: list):
+    def recieve_speed_modifications(self, speed_modifiers: list, penalties: list, regrets: list, acvs_ignoring_sensor: list):
         """
         Updates each ACV with a speed modification, penalty, and regret
         
@@ -133,7 +136,10 @@ class ACVUpdater(Observable):
             speed_modifiers (list): A list of speed modifiers to apply to each ACV.
             penalties (list): A list of penalties for each ACV in this iteration.
             regrets (list): A list of regrets for each ACV in this iteration.
+            acvs_ignoring_sensor (list): List of ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
         """
+
+        self.acvs_ignoring_sensor = acvs_ignoring_sensor.copy()
 
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV - speed is always constant

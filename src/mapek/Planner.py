@@ -34,6 +34,7 @@ class Planner(Component):
 
         chosen_penalties = list()
         regrets = list()
+        acvs_ignoring_sensor = list()    # ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
 
         for (index, new_speed) in enumerate(new_speeds):
             sensor_penalty = penalties[index][0]
@@ -49,6 +50,7 @@ class Planner(Component):
             if confidences[index] < confidence_threshold:
                 modifier_to_add = predicted_modifier
                 penalty_to_incur = actual_penalty
+                acvs_ignoring_sensor.append(index + 1)   # ACV0 not counted, so add 1 to index
             
             # Regret (R) = modded penalty (Pm) - actual penalty (Pa) → R = Pm - Pa
             regret = penalty_to_incur - actual_penalty
@@ -57,4 +59,4 @@ class Planner(Component):
             chosen_penalties.append(penalty_to_incur)
             regrets.append(regret)
 
-        self.executer.execute(speed_modifiers, chosen_penalties, regrets)
+        self.executer.execute(speed_modifiers, chosen_penalties, regrets, acvs_ignoring_sensor)
