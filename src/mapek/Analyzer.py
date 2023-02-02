@@ -2,6 +2,9 @@ from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 
+import numpy as np
+from ml_models.linearUCB import LinearUCB
+
 class Analyzer(Component):
     """
     The MAPE-K loop analyzer component.
@@ -35,6 +38,31 @@ class Analyzer(Component):
         new_speeds = list()
         confidences = list()
         penalties = list()
+
+        # ********************LINUCB*********************
+        readings = [distance[1] for distance in distances]
+
+        d = 1
+        alpha = 0.1
+        model = LinearUCB(d, alpha)
+
+        bad_sensors = []
+        arm = model.select_arm(readings)
+        penalty = self.calculate_penalty(readings[arm])
+        
+        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
+        
+        residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
+        print("Arm", arm, "Residual", model.theta[arm])
+        
+        if residual > 5:
+            bad_sensors.append(arm)
+        model.update(arm, readings[arm], penalty)
+            
+        print("Bad sensors:", bad_sensors)
+
+
+        #************************************************
 
         for (actual_distance, sensor_distance) in distances:
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
