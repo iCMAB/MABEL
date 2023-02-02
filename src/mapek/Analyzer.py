@@ -53,14 +53,13 @@ class Analyzer(Component):
         # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
         
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        print("Arm", arm, "Residual", model.theta[arm])
+        print("Arm", arm, "  Residual:", model.theta[arm][0])
         
         if residual > 5:
             bad_sensors.append(arm)
         model.update(arm, readings[arm], penalty)
             
         print("Bad sensors:", bad_sensors)
-
 
         #************************************************
 
