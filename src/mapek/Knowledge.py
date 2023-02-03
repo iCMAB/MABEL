@@ -15,6 +15,7 @@ class Knowledge:
     ideal_distance = None
     starting_speeds = None
     locations = None
+    model = None
 
     def __new__(cls, *args):
         """Creates a singleton instance of the Knowledge class."""
