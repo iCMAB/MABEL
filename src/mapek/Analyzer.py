@@ -38,14 +38,12 @@ class Analyzer(Component):
         ideal_distance = knowledge.ideal_distance
         target_speed = knowledge.target_speed
 
-        # Predict new lead ACV location
-        # knowledge.locations[0] = knowledge.locations[0] + target_speed
-
         new_speeds = list()
         confidences = list()
         penalties = list()
 
         # ********************LINUCB*********************
+
         # readings = [distance[1] for distance in distances]
 
         # d = 1
@@ -69,13 +67,10 @@ class Analyzer(Component):
 
         #************************************************
 
-        index = 1   # ACV indexes, distances array starts with ACV1 (ACV0 is lead and has no distance value)
+        index = 0
         for (actual_distance, sensor_distance) in distances:
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = target_speed + (sensor_distance - ideal_distance)
-
-            # Predict new ACV location given the new speed
-            #knowledge.locations[index] = knowledge.locations[index] + new_speed
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
@@ -115,24 +110,26 @@ class Analyzer(Component):
         # Penalty (P) = variation (V) from desired ^2 → P = V^2
         penalty = pow(distance - ideal_distance, 2)
 
+        # Crash penalty calculation
         for i, distance_pair in enumerate(self.distances):
-            actual_distance = distance_pair[0]
             sensor_distance = distance_pair[1]
-            
-            dist = sensor_distance if index != (i+1) else distance
+
+            # Use sensor distance for all except the specified index, in which case use the distance value given as a parameter
+            dist = sensor_distance if index != i else distance
             
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = target_speed + (dist - ideal_distance)
 
             # Predict new ACV location given the new speed
-            locations[i+1] += new_speed
+            locations[i] += new_speed
 
         crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
         crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)
 
-        sensor_altered = False if (index == 0) else (self.distances[index-1][0] != self.distances[index-1][1])
+        # We know the sensor was altered if the sensor distance and the actual distance are different
+        sensor_altered = (self.distances[index][0] != self.distances[index][1])
 
-        # A very large penalty is also incurred if the vehicles collide
+        # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
         if ((crash_front or crash_back) and sensor_altered):
             penalty = 1000000 
 
