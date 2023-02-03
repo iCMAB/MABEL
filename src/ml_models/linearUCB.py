@@ -12,8 +12,9 @@ class LinearUCB:
 
     def select_arm(self, readings):
         # Calculate the upper confidence bound for each arm
-        ucb = [0] * 3
-        for i in range(3):
+        length = len(readings)
+        ucb = [0] * length
+        for i in range(length):
             # theta = np.linalg.inv(self.A[i]).dot(self.b[i])
             x = np.array(readings[i]).reshape(-1, 1)
             ucb[i] = np.dot(self.theta[i].T, x) + self.alpha * math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x)))
