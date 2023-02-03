@@ -184,12 +184,35 @@ class Logger:
 
         print("\n=====================================\n")
 
-        table=[[acv.index, round_two_decimals(acv.total_penalty), round_two_decimals(acv.total_regret)] for acv in self.acvs]
-        headers=["ACV Index", "Penalty", "Regret"]
-        print(tabulate(table, headers, tablefmt="presto", disable_numparse=True))
+        table=[
+            [
+                acv.index, 
+                round_two_decimals(acv.total_penalty), 
+                round_two_decimals(acv.total_regret),
+                round_two_decimals(acv.baseline_penalty), 
+                round_two_decimals(acv.baseline_regret)
+            ] for acv in self.acvs]
+        headers=["ACV Index", "Penalty", "Regret", "Baseline Penalty", "Baseline Regret"]
+        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))
         
-        print("\n• Total crashes: " + str(crashes))
-        print("• Average penalty: " + round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs)))
-        print("• Total regret: " + round_two_decimals(sum([acv.total_regret for acv in self.acvs])))
+        # Bullet point metrics
+        avg_penalty = round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs))
+        avg_baseline_penalty = round_two_decimals(sum([acv.baseline_penalty for acv in self.acvs]) / len(self.acvs))
+        total_regret = round_two_decimals(sum([acv.total_regret for acv in self.acvs]))
+        total_baseline_regret = round_two_decimals(sum([acv.baseline_regret for acv in self.acvs]))
+
+        penalty_improvement = round_two_decimals((float(avg_baseline_penalty) - float(avg_penalty)) / float(avg_baseline_penalty) * 100)
+        regret_improvement = round_two_decimals((float(total_baseline_regret) - float(total_regret)) / float(total_baseline_regret) * 100)
+
+        print("\nLinUCB Metrics:")
+        print("• Total crashes: " + str(crashes))
         
+        print("• Average penalty:\t\tAverage baseline penalty:")
+        print("    " + avg_penalty + "\t\t\t  " + avg_baseline_penalty)
+        print("• Total regret:\t\t\tTotal baseline regret:")
+        print("    "  + total_regret + "\t\t\t  " + total_baseline_regret)
+        
+        print("• Improvement in avg penalty:\t" + str(penalty_improvement) + "%")
+        print("• Improvement in total regret:\t" + str(regret_improvement) + "%")
+
         print()

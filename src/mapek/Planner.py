@@ -14,7 +14,7 @@ class Planner(Component):
 
         self.executer = executer
 
-    def execute(self, new_speeds: list, penalties: list, confidences: list):
+    def execute(self, new_speeds: list, penalties: list, bad_sensor: int):
         """
         Calculates what to modify the current ACV speeds by based on the confidence measurement and sends it along with the penaly and regret incurred to the executer
         
@@ -34,7 +34,13 @@ class Planner(Component):
 
         chosen_penalties = list()
         regrets = list()
-        acvs_ignoring_sensor = list()    # ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
+
+        # Simply the penalties and regrets from distance sensor readings. Baseline values used to show what would have happened if no distance sensor correction has been performed. 
+        baseline_penalties = list()
+        baseline_regrets = list()
+        
+        # ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
+        acvs_ignoring_sensor = list()    
 
         for (index, new_speed) in enumerate(new_speeds):
             sensor_penalty = penalties[index][0]
@@ -47,16 +53,21 @@ class Planner(Component):
             penalty_to_incur = sensor_penalty
 
             # If confidence is low enough, go with the predicted value instead of the value from the distance sensor
-            if confidences[index] < confidence_threshold:
+            # if confidences[index] < confidence_threshold:
+            if bad_sensor != None and index == bad_sensor:
                 modifier_to_add = predicted_modifier
                 penalty_to_incur = actual_penalty
                 acvs_ignoring_sensor.append(index + 1)   # ACV0 not counted, so add 1 to index
             
             # Regret (R) = modded penalty (Pm) - actual penalty (Pa) → R = Pm - Pa
             regret = penalty_to_incur - actual_penalty
+            baseline_regret = sensor_penalty - actual_penalty
 
             speed_modifiers.append(modifier_to_add)
             chosen_penalties.append(penalty_to_incur)
             regrets.append(regret)
 
-        self.executer.execute(speed_modifiers, chosen_penalties, regrets, acvs_ignoring_sensor)
+            baseline_penalties.append(sensor_penalty)
+            baseline_regrets.append(baseline_regret)
+
+        self.executer.execute(speed_modifiers, chosen_penalties, regrets, baseline_penalties, baseline_regrets, acvs_ignoring_sensor)
