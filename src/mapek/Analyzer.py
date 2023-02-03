@@ -45,6 +45,7 @@ class Analyzer(Component):
         # ********************LINUCB*********************
 
         readings = [distance[1] for distance in distances]
+        # print(readings)
 
         model = knowledge.model
 
@@ -54,10 +55,12 @@ class Analyzer(Component):
         penalty = self.calculate_penalty(readings[arm], arm)
                 
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
+        # print ("Arm: ", arm, "Residual: ", residual)
         if residual > 5:
             bad_sensor = arm
             penalty = self.calculate_penalty(distances[arm][0], arm)
 
+        # print("Bad sensor: ", bad_sensor)
         model.update(arm, readings[arm], penalty)
 
         #************************************************

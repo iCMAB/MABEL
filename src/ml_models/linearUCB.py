@@ -20,6 +20,7 @@ class LinearUCB:
             ucb[i] = np.dot(self.theta[i].T, x) + self.alpha * math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x)))
 
         # Select the arm with the highest upper confidence bound
+        # print("UCB: ", ucb)
         return np.argmax(ucb)
 
     def update(self, arm, x, penalty):
