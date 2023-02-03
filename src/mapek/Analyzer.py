@@ -44,27 +44,25 @@ class Analyzer(Component):
 
         # ********************LINUCB*********************
 
-        # readings = [distance[1] for distance in distances]
+        readings = [distance[1] for distance in distances]
 
-        # d = 1
-        # alpha = 0.1
-        # model = LinearUCB(d, alpha)
+        d = 1
+        alpha = 0.1
+        model = LinearUCB(d, alpha)
 
-        # bad_sensors = []
-        # arm = model.select_arm(readings)
-        # penalty = self.calculate_penalty(readings[arm], arm)
+        bad_sensor = None
+        arm = model.select_arm(readings)
+        penalty = self.calculate_penalty(readings[arm], arm)
         
-        # # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
+        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
         
-        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # # print("Arm", arm, "  Residual:", model.theta[arm][0])
+        residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
+        # print("Arm", arm, "  Residual:", model.theta[arm][0])
         
-        # if residual > 5:
-        #     bad_sensors.append(arm)
-        # model.update(arm, readings[arm], penalty)
+        if residual > 5:
+            bad_sensor = arm
+        model.update(arm, readings[arm], penalty)
             
-        # print("Bad sensors:", bad_sensors)
-
         #************************************************
 
         index = 0
@@ -78,15 +76,15 @@ class Analyzer(Component):
             
             # TODO: In the future, the chosen ML model will determine the confidence value of the distance reading.
             # For now, ACVs are always fully confidenct that the distance is correct.
-            confidence = 1
+            # confidence = 1
 
             new_speeds.append(new_speed)
             penalties.append((sensor_penalty, actual_penalty)) 
-            confidences.append(confidence)
+            # confidences.append(confidence)
 
             index += 1
 
-        self.planner.execute(new_speeds, penalties, confidences)
+        self.planner.execute(new_speeds, penalties, bad_sensor)
         
     def calculate_penalty(self, distance, index) -> float:
         """

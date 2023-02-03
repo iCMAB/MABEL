@@ -14,7 +14,7 @@ class Planner(Component):
 
         self.executer = executer
 
-    def execute(self, new_speeds: list, penalties: list, confidences: list):
+    def execute(self, new_speeds: list, penalties: list, bad_sensor: int):
         """
         Calculates what to modify the current ACV speeds by based on the confidence measurement and sends it along with the penaly and regret incurred to the executer
         
@@ -53,7 +53,8 @@ class Planner(Component):
             penalty_to_incur = sensor_penalty
 
             # If confidence is low enough, go with the predicted value instead of the value from the distance sensor
-            if confidences[index] < confidence_threshold:
+            # if confidences[index] < confidence_threshold:
+            if bad_sensor != None and index == bad_sensor:
                 modifier_to_add = predicted_modifier
                 penalty_to_incur = actual_penalty
                 acvs_ignoring_sensor.append(index + 1)   # ACV0 not counted, so add 1 to index

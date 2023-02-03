@@ -106,10 +106,6 @@ class ACVUpdater(Observable):
             # Represents bad sensor reading modification
             modded_distance = self.mod_distance(actual_distance, index) 
             
-            # The predicted distance, which will be used if the sensor reading is ignored, is the last known distance reading from the ACV
-            # predicted_distance = acv.distance
-            # print(predicted_distance)
-            
             acv.distance = modded_distance
 
             distances.append((actual_distance, modded_distance))
