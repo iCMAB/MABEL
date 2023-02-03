@@ -5,7 +5,8 @@ class Knowledge:
     Attributes:
         target_speed (int): The target speed for all ACVs
         ideal_distance (int): The ideal distance for all ACVs
-        starting_speeds (list): List of starting speeds for each relevant ACV (not lead ACV)
+        starting_speeds (list): List of starting speeds for each ACV (not lead ACV)
+        locations (list): List of locations for each ACV (not lead ACV)
     """
 
     __instance = None
@@ -13,6 +14,7 @@ class Knowledge:
     target_speed = None
     ideal_distance = None
     starting_speeds = None
+    locations = None
 
     def __new__(cls, *args):
         """Creates a singleton instance of the Knowledge class."""

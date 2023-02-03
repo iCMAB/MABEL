@@ -32,14 +32,15 @@ class Observable:
 
         self.subscribers.remove(component)
 
-    def notify(self, distances: list, starting_speeds: list):
+    def notify(self, distances: list, speeds: list, locations: list):
         """
         Notify all subscribers of changes to distances and speeds in the observable
 
         Args:
             distances (list): The distances between the ACV and the one in front
-            starting_speeds (list): The current speeds of the ACV
+            speeds (list): The current speeds of the ACV
+            locations (list): The current locations of the ACV
         """
 
         for subscriber in self.subscribers:
-            subscriber.update(distances, starting_speeds)
+            subscriber.update(distances, speeds, locations)

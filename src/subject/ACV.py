@@ -10,6 +10,8 @@ class ACV:
         distance (float): The distance between the ACV and the ACV in front of it.
         total_penalty (float): The total penalty incurred by the ACV.
         total_regret (float): The total regret of the ACV.
+        baseline_penalty (float): The baseline penalty of the ACV (no MAB model in place).
+        baseline_regret (float): The baseline regret of the ACV (no MAB model in place).
     """
 
     def __init__(self, index: int, start_location: float, start_speed: float):
@@ -28,8 +30,10 @@ class ACV:
         self.distance = 0
         self.total_penalty = 0
         self.total_regret = 0
+        self.baseline_penalty = 0
+        self.baseline_regret = 0
 
-    def update(self, speed_modifier, penalty, regret):
+    def update(self, speed_modifier, penalty, regret, baseline_penalty, baseline_regret):
         """
         Updates the ACV's speed and location based on the given speed modifier.
 
@@ -37,10 +41,15 @@ class ACV:
             speed_modifier (float): The speed modifier to apply to the ACV.
             penalty (float): The penalty incurred in this iteration
             regret (float): The regret incurred in this iteration
+            baseline_penalty (float): The baseline penalty incurred in this iteration
+            baseline_regret (float): The baseline regret incurred in this iteration
         """
 
         self.total_penalty += penalty
         self.total_regret += regret
+
+        self.baseline_penalty += baseline_penalty
+        self.baseline_regret += baseline_regret
 
         self.speed += speed_modifier
         self.speed = max(min(self.speed, subject.MAX_SPEED), -subject.MAX_SPEED)

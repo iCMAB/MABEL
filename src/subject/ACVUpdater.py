@@ -90,9 +90,13 @@ class ACVUpdater(Observable):
         knowledge = Knowledge()
         distances = list()
         speeds = list()
+        locations = list()
 
         # Get distances between ACVs
         for (index, acv) in enumerate(self.acvs):
+            # Collect locations of all ACVs, including ACV0
+            locations.append(acv.location)
+
             if index == 0:
                 knowledge.target_speed = acv.speed
                 continue
@@ -101,13 +105,19 @@ class ACVUpdater(Observable):
 
             # Represents bad sensor reading modification
             modded_distance = self.mod_distance(actual_distance, index) 
+            
+            # The predicted distance, which will be used if the sensor reading is ignored, is the last known distance reading from the ACV
+            # predicted_distance = acv.distance
+            # print(predicted_distance)
+            
             acv.distance = modded_distance
 
             distances.append((actual_distance, modded_distance))
             speeds.append(acv.speed)
+            
         
         # Send distance and speed data for all ACVs except lead to MAPE-K loop
-        self.notify(distances, speeds)
+        self.notify(distances, speeds, locations)
     
     def mod_distance(self, distance, index) -> float:
         """
@@ -128,7 +138,7 @@ class ACVUpdater(Observable):
         
         return modded_distance
 
-    def recieve_speed_modifications(self, speed_modifiers: list, penalties: list, regrets: list, acvs_ignoring_sensor: list):
+    def recieve_speed_modifications(self, speed_modifiers: list, penalties: list, regrets: list, baseline_penalties: list, baseline_regrets: list, acvs_ignoring_sensor: list):
         """
         Updates each ACV with a speed modification, penalty, and regret
         
@@ -136,6 +146,8 @@ class ACVUpdater(Observable):
             speed_modifiers (list): A list of speed modifiers to apply to each ACV.
             penalties (list): A list of penalties for each ACV in this iteration.
             regrets (list): A list of regrets for each ACV in this iteration.
+            baseline_penalties (list): A list of baseline penalties for each ACV in this iteration.
+            baseline_regrets (list): A list of baseline regrets for each ACV in this iteration.
             acvs_ignoring_sensor (list): List of ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
         """
 
@@ -144,11 +156,11 @@ class ACVUpdater(Observable):
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV - speed is always constant
             if index == 0:
-                acv.update(0, 0, 0)
+                acv.update(0, 0, 0, 0, 0)
                 continue
 
             i = index - 1
-            acv.update(speed_modifiers[i], penalties[i], regrets[i])
+            acv.update(speed_modifiers[i], penalties[i], regrets[i], baseline_penalties[i], baseline_regrets[i])
 
     def detect_crashes(self) -> list:
         """

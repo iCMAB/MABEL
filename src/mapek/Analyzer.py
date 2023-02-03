@@ -22,6 +22,7 @@ class Analyzer(Component):
         """
 
         self.planner = planner
+        self.distances = list()
 
     def execute(self, distances: list):
         """
@@ -31,45 +32,54 @@ class Analyzer(Component):
             distances (list): List of distances from the sensors for each ACV
         """
 
+        self.distances = distances
+
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
         target_speed = knowledge.target_speed
+
+        # Predict new lead ACV location
+        # knowledge.locations[0] = knowledge.locations[0] + target_speed
 
         new_speeds = list()
         confidences = list()
         penalties = list()
 
         # ********************LINUCB*********************
-        readings = [distance[1] for distance in distances]
+        # readings = [distance[1] for distance in distances]
 
-        d = 1
-        alpha = 0.1
-        model = LinearUCB(d, alpha)
+        # d = 1
+        # alpha = 0.1
+        # model = LinearUCB(d, alpha)
 
-        bad_sensors = []
-        arm = model.select_arm(readings)
-        penalty = self.calculate_penalty(readings[arm])
+        # bad_sensors = []
+        # arm = model.select_arm(readings)
+        # penalty = self.calculate_penalty(readings[arm], arm)
         
-        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
+        # # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
         
-        residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        print("Arm", arm, "  Residual:", model.theta[arm][0])
+        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
+        # # print("Arm", arm, "  Residual:", model.theta[arm][0])
         
-        if residual > 5:
-            bad_sensors.append(arm)
-        model.update(arm, readings[arm], penalty)
+        # if residual > 5:
+        #     bad_sensors.append(arm)
+        # model.update(arm, readings[arm], penalty)
             
-        print("Bad sensors:", bad_sensors)
+        # print("Bad sensors:", bad_sensors)
 
         #************************************************
 
+        index = 1   # ACV indexes, distances array starts with ACV1 (ACV0 is lead and has no distance value)
         for (actual_distance, sensor_distance) in distances:
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = target_speed + (sensor_distance - ideal_distance)
 
+            # Predict new ACV location given the new speed
+            #knowledge.locations[index] = knowledge.locations[index] + new_speed
+
             # Separate penalties for the potential bad sensor reading and the ground truth
-            sensor_penalty = self.calculate_penalty(sensor_distance)
-            actual_penalty = self.calculate_penalty(actual_distance)
+            sensor_penalty = self.calculate_penalty(sensor_distance, index)
+            actual_penalty = self.calculate_penalty(actual_distance, index)
             
             # TODO: In the future, the chosen ML model will determine the confidence value of the distance reading.
             # For now, ACVs are always fully confidenct that the distance is correct.
@@ -79,27 +89,51 @@ class Analyzer(Component):
             penalties.append((sensor_penalty, actual_penalty)) 
             confidences.append(confidence)
 
+            index += 1
+
         self.planner.execute(new_speeds, penalties, confidences)
         
-    def calculate_penalty(self, distance) -> float:
+    def calculate_penalty(self, distance, index) -> float:
         """
         Calculates the penalty using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2 for an ACV given distance between it and the one in front of it
         
         Args:
-            distance (float): The distance between the given ACV and the one in front of it
-            
+            distance (float): What the distance sensor percieves is the distance between the given ACV and the one in front of it
+            index (int): The index of the ACV in the given list of ACV distances and locations (0 is ACV1, 1 is ACV2, etc.)            
+
         Returns:
             float: The penalty for the ACV
         """
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
+        locations = knowledge.locations.copy()
+        target_speed = knowledge.target_speed
+
+        locations[0] += target_speed
 
         # Penalty (P) = variation (V) from desired ^2 → P = V^2
         penalty = pow(distance - ideal_distance, 2)
 
+        for i, distance_pair in enumerate(self.distances):
+            actual_distance = distance_pair[0]
+            sensor_distance = distance_pair[1]
+            
+            dist = sensor_distance if index != (i+1) else distance
+            
+            # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
+            new_speed = target_speed + (dist - ideal_distance)
+
+            # Predict new ACV location given the new speed
+            locations[i+1] += new_speed
+
+        crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
+        crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)
+
+        sensor_altered = False if (index == 0) else (self.distances[index-1][0] != self.distances[index-1][1])
+
         # A very large penalty is also incurred if the vehicles collide
-        if (distance <= 0):
+        if ((crash_front or crash_back) and sensor_altered):
             penalty = 1000000 
-        
+
         return penalty
