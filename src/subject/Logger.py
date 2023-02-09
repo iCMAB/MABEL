@@ -79,8 +79,8 @@ class Logger:
             mod_values = self.iterations_to_mod[iteration]  # mod_values is a tuple -> (acv_index, distance_to_modify)
 
             # Distance is colored green if the ACV is ignoring the distance sensor value, yellow otherwise
-            color = Logger.IGNORED_DST_COLOR if mod_values[0] in self.acvs_ignoring_sensor else Logger.MODIFIED_DST_COLOR
-            distances[mod_values[0]] = self.modify_cell_color(distances[mod_values[0]], color)
+            # color = Logger.IGNORED_DST_COLOR if mod_values[0] in self.acvs_ignoring_sensor else Logger.MODIFIED_DST_COLOR
+            distances[mod_values[0]] = self.modify_cell_color(distances[mod_values[0]], Logger.MODIFIED_DST_COLOR)
 
             mod_values = self.iterations_to_mod[iteration]
             flags += "ACV" + str(mod_values[0]) + " Dst x" + str(mod_values[1])
@@ -110,7 +110,7 @@ class Logger:
         Returns:
             str: The colored cell
         """
-        return str(color + '{:^{width}}'.format(value, width=self.column_width) + Logger.COLOR_RESET)
+        return str(Logger.COLOR_RESET + color + '{:^{width}}'.format(value, width=self.column_width) + Logger.COLOR_RESET)
 
     def print_acv_locations(self, iteration: int, crash_list: dict):
         """
@@ -128,10 +128,15 @@ class Logger:
         locations = [round(acv.location, 2) for acv in self.acvs]
         speeds = [round(acv.speed, 2) for acv in self.acvs]
         distances = [round(acv.distance, 2) for acv in self.acvs]
+        distances_copy = distances.copy()
 
         # Get flags before conputing the column aggregate so that cell highlighting can be applied
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
 
+        # Color all cells which the ACV is ignoring green
+        for acv_index in self.acvs_ignoring_sensor:
+            distances[acv_index] = self.modify_cell_color(distances_copy[acv_index], Logger.IGNORED_DST_COLOR)
+            
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
         lead_acv_col = [speeds[0], locations[0]]
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))

@@ -3,7 +3,7 @@ from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 
 import numpy as np
-from ml_models.linearUCB import LinearUCB
+
 
 class Analyzer(Component):
     """
@@ -45,24 +45,24 @@ class Analyzer(Component):
         # ********************LINUCB*********************
 
         readings = [distance[1] for distance in distances]
+        # print(readings)
 
-        d = 1
-        alpha = 0.1
-        model = LinearUCB(d, alpha)
+        model = knowledge.model
 
         bad_sensor = None
         arm = model.select_arm(readings)
+
         penalty = self.calculate_penalty(readings[arm], arm)
-        
-        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
-        
+                
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print("Arm", arm, "  Residual:", model.theta[arm][0])
-        
+        # print ("Arm: ", arm, "Residual: ", residual)
         if residual > 5:
             bad_sensor = arm
+            penalty = self.calculate_penalty(distances[arm][0], arm)
+
+        # print("Bad sensor: ", bad_sensor)
         model.update(arm, readings[arm], penalty)
-            
+
         #************************************************
 
         index = 0
