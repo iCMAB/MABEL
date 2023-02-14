@@ -65,7 +65,8 @@ class Analyzer(Component):
         model = knowledge.model
 
         self.bad_sensor = None
-        arm = model.select_arm(readings)
+        arm = model.select_arm()
+        print(arm, readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
         
