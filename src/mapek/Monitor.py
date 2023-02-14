@@ -3,6 +3,8 @@ from mapek.Analyzer import Analyzer
 from mapek.Observer import Observer
 from mapek.Component import Component
 
+from copy import deepcopy
+
 class Monitor(Observer, Component):
     """
     The MAPE-K loop monitor component.
@@ -30,7 +32,8 @@ class Monitor(Observer, Component):
             speeds (list): List of  speeds for each relevant ACV
         """
 
-        self.execute(acvs.copy(), actual_distances.copy())
+        acvs_copy = deepcopy(acvs)
+        self.execute(acvs_copy, actual_distances.copy())
 
     def execute(self, acvs: list, actual_distances: list):
         """

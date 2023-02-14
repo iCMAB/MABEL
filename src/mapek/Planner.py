@@ -46,8 +46,8 @@ class Planner(Component):
             sensor_penalty = penalties[index][0]
             actual_penalty = penalties[index][1]
 
-            normal_modifier = new_speeds[index] - acv.target_speed
-            predicted_modifier = knowledge.target_speed - acv.target_speed  # Defaults to target speed if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
+            normal_modifier = new_speeds[index][0] - acv.target_speed
+            predicted_modifier = new_speeds[index][1] - acv.target_speed  # Defaults to target speed if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
            
             modifier_to_add = normal_modifier
             penalty_to_incur = sensor_penalty

@@ -1,6 +1,9 @@
 from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
+
+from copy import deepcopy
+
 import subject
 
 import numpy as np
@@ -25,7 +28,7 @@ class Analyzer(Component):
         self.planner = planner
         self.distances = list()
         self.locations = list()
-        self.trailing_acvs = list()
+        self.acvs = list()
         self.iteration = 0
 
     def execute(self, acvs: list):
@@ -38,8 +41,8 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
 
+        self.acvs = acvs
         trailing_acvs = acvs[1:]
-        self.trailing_acvs = trailing_acvs
 
         self.distances = [(acv.distance, knowledge.actual_distances[i]) for (i, acv) in enumerate(trailing_acvs)]
         self.locations = [acv.location for acv in acvs]
@@ -62,7 +65,7 @@ class Analyzer(Component):
                 
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
         # print("Arm" + str(arm), "Residual: " + str(residual))
-        if residual > 6:
+        if residual > 5:
             bad_sensor = arm
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
@@ -78,6 +81,7 @@ class Analyzer(Component):
 
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
+            actual_speed = knowledge.target_speed + (actual_distance - ideal_distance)
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
@@ -87,7 +91,7 @@ class Analyzer(Component):
             # For now, ACVs are always fully confidenct that the distance is correct.
             # confidence = 1
 
-            new_speeds.append(new_speed)
+            new_speeds.append((new_speed, actual_speed))
             penalties.append((sensor_penalty, actual_penalty)) 
             # confidences.append(confidence)
 
@@ -110,33 +114,30 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
-        starting_speeds = knowledge.starting_speeds
-        locations = self.locations.copy()
         target_speed = knowledge.target_speed
-        trailing_acvs = self.trailing_acvs
-
-        locations[0] += target_speed
+        acvs = deepcopy(self.acvs)
 
         # Penalty (P) = variation (V) from desired ^2 → P = V^2
         penalty = pow(distance - ideal_distance, 2)
 
         # Crash penalty calculation
-        for (i, acv) in enumerate(trailing_acvs):
+        for (i, acv) in enumerate(acvs):
+            if (i == 0):
+                acv.update(0)
+                continue
+
             sensor_distance = acv.distance
 
             # Use sensor distance for all except the specified index, in which case use the distance value given as a parameter
             dist = sensor_distance if index != i else distance
             
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
-            s = target_speed + (dist - ideal_distance)
-            modifier = s - acv.target_speed
-            new_speed = acv.target_speed + modifier
+            new_speed = target_speed + (dist - ideal_distance)
+            modifier = new_speed - acv.target_speed
 
-            # Predict new ACV location given the new speed
-            easing = subject.ACV_EASING
-            speed = (starting_speeds[i] + (new_speed - starting_speeds[i]) * easing)
-            
-            locations[i+1] += speed
+            acv.update(modifier)
+
+        locations = [acv.location for acv in acvs]
 
         crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
         crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)

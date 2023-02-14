@@ -34,7 +34,7 @@ class ACV:
         self.baseline_penalty = 0
         self.baseline_regret = 0
 
-    def update(self, speed_modifier, penalty, regret, baseline_penalty, baseline_regret):
+    def update(self, speed_modifier, penalty=0, regret=0, baseline_penalty=0, baseline_regret=0):
         """
         Updates the ACV's speed and location based on the given speed modifier.
 

@@ -151,7 +151,7 @@ class ACVUpdater(Observable):
         for (index, acv) in enumerate(self.acvs):
             # Don't modify speed of lead ACV - speed is always constant
             if index == 0:
-                acv.update(0, 0, 0, 0, 0)
+                acv.update(0)
                 continue
 
             i = index - 1
