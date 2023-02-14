@@ -4,7 +4,7 @@ from mapek.Planner import Planner
 import subject
 
 import numpy as np
-
+import math
 
 class Analyzer(Component):
     """
@@ -25,6 +25,8 @@ class Analyzer(Component):
         self.planner = planner
         self.distances = list()
         self.locations = list()
+        self.trailing_acvs = list()
+        self.iteration = 0
 
     def execute(self, acvs: list):
         """
@@ -36,21 +38,20 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
 
-        self.distances = [(acvs[i+1].distance, knowledge.actual_distances[i]) for i in range(len(acvs)-1)]
+        trailing_acvs = acvs[1:]
+        self.trailing_acvs = trailing_acvs
+
+        self.distances = [(acv.distance, knowledge.actual_distances[i]) for (i, acv) in enumerate(trailing_acvs)]
         self.locations = [acv.location for acv in acvs]
 
         ideal_distance = knowledge.ideal_distance
-        target_speed = knowledge.target_speed
 
         new_speeds = list()
         penalties = list()
 
         # ********************LINUCB*********************
 
-        readings = [acv.distance for acv in acvs]
-        readings.pop(0)
-
-        # print(readings)
+        readings = [acv.distance for acv in trailing_acvs]
 
         model = knowledge.model
 
@@ -60,20 +61,23 @@ class Analyzer(Component):
         penalty = self.calculate_penalty(readings[arm], arm)
                 
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print ("Arm: ", arm, "Residual: ", residual)
+        # print("Arm" + str(arm), "Residual: " + str(residual))
         if residual > 6:
             bad_sensor = arm
-            penalty = self.calculate_penalty(self.distances[arm][0], arm)
+            penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
-        # print("Bad sensor: ", bad_sensor)
         model.update(arm, readings[arm], penalty)
+        self.iteration += 1
 
-        #************************************************
+        # ************************************************
 
         index = 0
-        for (actual_distance, sensor_distance) in self.distances:
+        for (index, acv) in enumerate(trailing_acvs):
+            sensor_distance = acv.distance
+            actual_distance = knowledge.actual_distances[index]
+
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
-            new_speed = target_speed + (sensor_distance - ideal_distance)
+            new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
@@ -89,8 +93,9 @@ class Analyzer(Component):
 
             index += 1
 
-        self.planner.execute(new_speeds, penalties, bad_sensor)
+        self.planner.execute(new_speeds, penalties, bad_sensor, trailing_acvs)
         
+    # TODO: Move into the subject folder and send penalty back to model after MAPE-K runs
     def calculate_penalty(self, distance, index) -> float:
         """
         Calculates the penalty using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2 for an ACV given distance between it and the one in front of it
@@ -106,8 +111,9 @@ class Analyzer(Component):
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
         starting_speeds = knowledge.starting_speeds
-        locations = self.locations
+        locations = self.locations.copy()
         target_speed = knowledge.target_speed
+        trailing_acvs = self.trailing_acvs
 
         locations[0] += target_speed
 
@@ -115,18 +121,22 @@ class Analyzer(Component):
         penalty = pow(distance - ideal_distance, 2)
 
         # Crash penalty calculation
-        for i, distance_pair in enumerate(self.distances):
-            sensor_distance = distance_pair[1]
+        for (i, acv) in enumerate(trailing_acvs):
+            sensor_distance = acv.distance
 
             # Use sensor distance for all except the specified index, in which case use the distance value given as a parameter
             dist = sensor_distance if index != i else distance
             
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
-            new_speed = target_speed + (dist - ideal_distance)
+            s = target_speed + (dist - ideal_distance)
+            modifier = s - acv.target_speed
+            new_speed = acv.target_speed + modifier
 
             # Predict new ACV location given the new speed
             easing = subject.ACV_EASING
-            locations[i+1] += (starting_speeds[i] + (new_speed - starting_speeds[i]) * easing)
+            speed = (starting_speeds[i] + (new_speed - starting_speeds[i]) * easing)
+            
+            locations[i+1] += speed
 
         crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
         crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)

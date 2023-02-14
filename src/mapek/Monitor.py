@@ -44,6 +44,7 @@ class Monitor(Observer, Component):
         knowledge = Knowledge()
         knowledge.actual_distances = actual_distances
         knowledge.starting_speeds = [acv.speed for acv in acvs]
+        knowledge.starting_speeds.pop(0) # Remove lead ACV's speed, not relevant
         # knowledge.locations = locations
 
         self.analyzer.execute(acvs)

@@ -14,7 +14,7 @@ class Planner(Component):
 
         self.executer = executer
 
-    def execute(self, new_speeds: list, penalties: list, bad_sensor: int):
+    def execute(self, new_speeds: list, penalties: list, bad_sensor: int, trailing_acvs: list):
         """
         Calculates what to modify the current ACV speeds by based on the confidence measurement and sends it along with the penaly and regret incurred to the executer
         
@@ -26,7 +26,6 @@ class Planner(Component):
 
         knowledge = Knowledge()
         starting_speeds = knowledge.starting_speeds
-        starting_speeds.pop(0) # Remove lead ACV's starting speed
 
         confidence_threshold = 0.5  # TODO: Decide how to handle this value
 
@@ -43,15 +42,13 @@ class Planner(Component):
         # ACVs who have ignored their distance sensor reading in favor of the predicted value. Used for visual purposes.
         acvs_ignoring_sensor = list()    
 
-        for (index, new_speed) in enumerate(new_speeds):
+        for (index, acv) in enumerate(trailing_acvs):
             sensor_penalty = penalties[index][0]
             actual_penalty = penalties[index][1]
 
-            normal_modifier = new_speed - starting_speeds[index]
-            predicted_modifier = knowledge.target_speed - starting_speeds[index]  # Defaults to target speed if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
-
-            # print(new_speed, " - ", starting_speeds[index], " = ", normal_modifier)
-
+            normal_modifier = new_speeds[index] - acv.target_speed
+            predicted_modifier = knowledge.target_speed - acv.target_speed  # Defaults to target speed if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
+           
             modifier_to_add = normal_modifier
             penalty_to_incur = sensor_penalty
 
