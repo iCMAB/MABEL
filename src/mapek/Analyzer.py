@@ -51,10 +51,10 @@ class Analyzer(Component):
         alpha = 0.1
         # model = LinearUCB(d, alpha)
         # To-do make this change
-        model = LinearThompsonSampling(d)
+        model = knowledge.model
 
         bad_sensor = None
-        arm = model.select_arm(readings)
+        arm = model.select_arm()
         penalty = self.calculate_penalty(readings[arm], arm)
         
         # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]

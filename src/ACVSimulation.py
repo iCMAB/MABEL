@@ -29,6 +29,7 @@ def run_simulation():
     analyzer = Analyzer(planner)
     monitor = Monitor(analyzer)
 
+
     updater.register(monitor)
     updater.read_data()
 

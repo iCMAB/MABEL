@@ -3,21 +3,26 @@ from scipy.linalg import inv
 
 class LinearThompsonSampling:
     def __init__(self, d):
+        self.iteration = 1
         self.d = d
         # Covariance matrix, initialized as identity matrix
-        self.A = [np.identity(d)] * 4
+        self.var = [np.identity(d)] * 4
         self.means = [np.identity(d)] * 4
         self.b = [np.zeros((d, 1))] * 4  # Observation vector, initialized as zero vector
         self.theta = [np.zeros((d, 1))] * 4
-        self.var = [np.zeros((d, 1))] * 4
 
-    def update(self, arm, x, reward):
+    def update(self, arm, x, reward):        
         x = np.array(x).reshape(-1, 1)
-        self.A[arm] += np.dot(x, x.T)  # Update covariance matrix
+        self.var[arm] += np.dot(x, x.T)  # Update covariance matrix
         self.b[arm] += reward * x.reshape(-1)  # Update observation vector
-        self.theta[arm] = np.linalg.inv(self.A[arm]).dot(self.b[arm])
+        self.theta[arm] = np.linalg.inv(self.var[arm]).dot(self.b[arm])
+        # update self.means
+        self.means[arm]=(self.b[arm]-self.means[arm])/self.iteration
+        self.iteration+=1
+        print(self.iteration)
 
 
-    def select_arm(self, readings):
+
+    def select_arm(self):
         theta = np.random.normal(self.means, np.sqrt(self.var))
         return np.argmax(theta)
