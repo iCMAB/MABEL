@@ -28,7 +28,11 @@ class ACV:
         self.location = start_location
         self.target_speed = start_speed  
         self.speed = start_speed
+        
         self.distance = 0
+        self.distance_record = list()
+        self.predicted_distance = 0
+
         self.total_penalty = 0
         self.total_regret = 0
         self.baseline_penalty = 0
@@ -59,3 +63,20 @@ class ACV:
         self.speed = (self.speed + (self.target_speed - self.speed) * easing)
 
         self.location += self.speed
+
+    def set_distance(self, new_distance: float):
+        """
+        Sets the distance between the ACV and the ACV in front of it, then recomputes the predicted distance.
+        
+        Args:
+            new_distance (float): The new distance between the ACV and the ACV in front of it.
+        """
+        self.distance = new_distance
+
+        self.distance_record.append(new_distance)
+        if (len(self.distance_record) > 5):
+            self.distance_record.pop(0)
+
+        self.predicted_distance = sum(self.distance_record) / len(self.distance_record)
+
+

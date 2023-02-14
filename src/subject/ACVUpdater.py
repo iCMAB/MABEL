@@ -106,7 +106,7 @@ class ACVUpdater(Observable):
             # Represents bad sensor reading modification
             modded_distance = self.mod_distance(actual_distance, index) 
             
-            acv.distance = modded_distance
+            acv.set_distance(modded_distance)
 
             actual_distances.append(actual_distance)
             speeds.append(acv.speed)
