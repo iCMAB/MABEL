@@ -56,7 +56,7 @@ class ACV:
         self.target_speed = max(min(self.target_speed, subject.MAX_SPEED), -subject.MAX_SPEED)
         
         # print(self.target_speed)
-        easing = 0.75
+        easing = subject.ACV_EASING
         self.speed = (self.speed + (self.target_speed - self.speed) * easing)
 
         self.location += self.speed

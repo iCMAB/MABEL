@@ -1,6 +1,7 @@
 from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
+import subject
 
 import numpy as np
 
@@ -54,8 +55,8 @@ class Analyzer(Component):
         penalty = self.calculate_penalty(readings[arm], arm)
                 
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        print ("Arm: ", arm, "Residual: ", residual)
-        if residual > 7:
+        # print ("Arm: ", arm, "Residual: ", residual)
+        if residual > 6:
             bad_sensor = arm
             penalty = self.calculate_penalty(distances[arm][0], arm)
 
@@ -119,9 +120,8 @@ class Analyzer(Component):
             new_speed = target_speed + (dist - ideal_distance)
 
             # Predict new ACV location given the new speed
-            locations[i+1] += (starting_speeds[i] + (new_speed - starting_speeds[i]) * 0.75)
-
-        # print(locations)
+            easing = subject.ACV_EASING
+            locations[i+1] += (starting_speeds[i] + (new_speed - starting_speeds[i]) * easing)
 
         crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
         crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)
