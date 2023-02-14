@@ -26,7 +26,8 @@ class ACV:
 
         self.index = index
         self.location = start_location
-        self.speed = start_speed  
+        self.target_speed = start_speed  
+        self.speed = start_speed
         self.distance = 0
         self.total_penalty = 0
         self.total_regret = 0
@@ -51,7 +52,11 @@ class ACV:
         self.baseline_penalty += baseline_penalty
         self.baseline_regret += baseline_regret
 
-        self.speed += speed_modifier
-        self.speed = max(min(self.speed, subject.MAX_SPEED), -subject.MAX_SPEED)
+        self.target_speed += speed_modifier
+        self.target_speed = max(min(self.target_speed, subject.MAX_SPEED), -subject.MAX_SPEED)
         
+        # print(self.target_speed)
+        easing = 0.75
+        self.speed = (self.speed + (self.target_speed - self.speed) * easing)
+
         self.location += self.speed

@@ -39,7 +39,6 @@ class Analyzer(Component):
         target_speed = knowledge.target_speed
 
         new_speeds = list()
-        confidences = list()
         penalties = list()
 
         # ********************LINUCB*********************
@@ -55,8 +54,8 @@ class Analyzer(Component):
         penalty = self.calculate_penalty(readings[arm], arm)
                 
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print ("Arm: ", arm, "Residual: ", residual)
-        if residual > 5:
+        print ("Arm: ", arm, "Residual: ", residual)
+        if residual > 7:
             bad_sensor = arm
             penalty = self.calculate_penalty(distances[arm][0], arm)
 
@@ -100,6 +99,7 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
+        starting_speeds = knowledge.starting_speeds
         locations = knowledge.locations.copy()
         target_speed = knowledge.target_speed
 
@@ -119,7 +119,9 @@ class Analyzer(Component):
             new_speed = target_speed + (dist - ideal_distance)
 
             # Predict new ACV location given the new speed
-            locations[i] += new_speed
+            locations[i+1] += (starting_speeds[i] + (new_speed - starting_speeds[i]) * 0.75)
+
+        # print(locations)
 
         crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
         crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)
