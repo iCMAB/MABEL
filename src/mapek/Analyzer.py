@@ -2,8 +2,12 @@ from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 
-import numpy as np
+from copy import deepcopy
 
+import subject
+
+import numpy as np
+import math
 
 class Analyzer(Component):
     """
@@ -23,8 +27,12 @@ class Analyzer(Component):
 
         self.planner = planner
         self.distances = list()
+        self.locations = list()
+        self.acvs = list()
+        self.iteration = 0
+        self.bad_sensor = None
 
-    def execute(self, distances: list):
+    def execute(self, acvs: list):
         """
         Calculates the new speed, the potential penalties incurred, and the confidence of the distance readings for each ACV and sends them to the planner
         
@@ -32,43 +40,51 @@ class Analyzer(Component):
             distances (list): List of distances from the sensors for each ACV
         """
 
-        self.distances = distances
-
         knowledge = Knowledge()
+
+        self.acvs = acvs
+        trailing_acvs = acvs[1:]
+
+        self.distances = [(acv.distance, knowledge.actual_distances[i]) for (i, acv) in enumerate(trailing_acvs)]
+        self.locations = [acv.location for acv in acvs]
+
         ideal_distance = knowledge.ideal_distance
-        target_speed = knowledge.target_speed
 
         new_speeds = list()
-        confidences = list()
         penalties = list()
 
         # ********************LINUCB*********************
 
-        readings = [distance[1] for distance in distances]
-        # print(readings)
+        readings = [acv.distance for acv in trailing_acvs]
 
         model = knowledge.model
 
-        bad_sensor = None
+        self.bad_sensor = None
         arm = model.select_arm(readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
                 
         residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print ("Arm: ", arm, "Residual: ", residual)
+        # print("Arm" + str(arm), "Residual: " + str(residual))
         if residual > 5:
-            bad_sensor = arm
-            penalty = self.calculate_penalty(distances[arm][0], arm)
+            self.bad_sensor = arm
+            penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
-        # print("Bad sensor: ", bad_sensor)
         model.update(arm, readings[arm], penalty)
+        self.iteration += 1
 
-        #************************************************
+        # ************************************************
 
         index = 0
-        for (actual_distance, sensor_distance) in distances:
+        for (index, acv) in enumerate(trailing_acvs):
+            sensor_distance = acv.distance
+            predicted_distance = acv.predicted_distance
+            actual_distance = knowledge.actual_distances[index]
+
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
-            new_speed = target_speed + (sensor_distance - ideal_distance)
+            new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
+            predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
+            actual_speed = knowledge.target_speed + (actual_distance - ideal_distance)
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
@@ -78,14 +94,15 @@ class Analyzer(Component):
             # For now, ACVs are always fully confidenct that the distance is correct.
             # confidence = 1
 
-            new_speeds.append(new_speed)
+            new_speeds.append((new_speed, actual_speed))
             penalties.append((sensor_penalty, actual_penalty)) 
             # confidences.append(confidence)
 
             index += 1
 
-        self.planner.execute(new_speeds, penalties, bad_sensor)
+        self.planner.execute(new_speeds, penalties, self.bad_sensor, trailing_acvs)
         
+    # TODO: Penalty calculation and crash detection does not take into account the predicted distance if the sensor is ignored
     def calculate_penalty(self, distance, index) -> float:
         """
         Calculates the penalty using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2 for an ACV given distance between it and the one in front of it
@@ -100,35 +117,41 @@ class Analyzer(Component):
 
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
-        locations = knowledge.locations.copy()
         target_speed = knowledge.target_speed
-
-        locations[0] += target_speed
+        acvs = deepcopy(self.acvs)
 
         # Penalty (P) = variation (V) from desired ^2 → P = V^2
         penalty = pow(distance - ideal_distance, 2)
 
         # Crash penalty calculation
-        for i, distance_pair in enumerate(self.distances):
-            sensor_distance = distance_pair[1]
+        for (i, acv) in enumerate(acvs):
+            if (i == 0):
+                acv.update(0)
+                continue
+
+            sensor_distance = acv.distance
 
             # Use sensor distance for all except the specified index, in which case use the distance value given as a parameter
             dist = sensor_distance if index != i else distance
             
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = target_speed + (dist - ideal_distance)
+            modifier = new_speed - acv.target_speed
 
-            # Predict new ACV location given the new speed
-            locations[i] += new_speed
+            acv.update(modifier)
 
-        crash_front = False if (index == 0) else (locations[index - 1] - locations[index] < 0)
-        crash_back = False if (index >= len(locations) - 1) else (locations[index] - locations[index + 1] < 0)
+        locations = [acv.location for acv in acvs]
+
+        acv_index = index + 1
+
+        crash_front = False if (acv_index == 0) else (locations[acv_index - 1] - locations[acv_index] < 0)
+        crash_back = False if (acv_index >= len(locations) - 1) else (locations[acv_index] - locations[acv_index + 1] < 0)
 
         # We know the sensor was altered if the sensor distance and the actual distance are different
         sensor_altered = (self.distances[index][0] != self.distances[index][1])
 
         # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
-        if ((crash_front or crash_back) and sensor_altered):
+        if ((crash_front or crash_back) and (sensor_altered or self.bad_sensor == index)):
             penalty = 1000000 
 
         return penalty
