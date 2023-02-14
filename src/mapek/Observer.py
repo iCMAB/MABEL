@@ -4,7 +4,7 @@ class Observer(ABC):
     """Generic observer class for the observer pattern that gets notified of changes in observable. Used by the Monitor component of the MAPE-K loop."""
 
     @abstractmethod
-    def update(distances: list, starting_speeds: list):
+    def update(acvs: list, actual_distances: list):
         """
         Generic update method for observers to be overridden.
         

@@ -24,8 +24,9 @@ class Analyzer(Component):
 
         self.planner = planner
         self.distances = list()
+        self.locations = list()
 
-    def execute(self, distances: list):
+    def execute(self, acvs: list):
         """
         Calculates the new speed, the potential penalties incurred, and the confidence of the distance readings for each ACV and sends them to the planner
         
@@ -33,9 +34,11 @@ class Analyzer(Component):
             distances (list): List of distances from the sensors for each ACV
         """
 
-        self.distances = distances
-
         knowledge = Knowledge()
+
+        self.distances = [(acvs[i+1].distance, knowledge.actual_distances[i]) for i in range(len(acvs)-1)]
+        self.locations = [acv.location for acv in acvs]
+
         ideal_distance = knowledge.ideal_distance
         target_speed = knowledge.target_speed
 
@@ -44,7 +47,9 @@ class Analyzer(Component):
 
         # ********************LINUCB*********************
 
-        readings = [distance[1] for distance in distances]
+        readings = [acv.distance for acv in acvs]
+        readings.pop(0)
+
         # print(readings)
 
         model = knowledge.model
@@ -58,7 +63,7 @@ class Analyzer(Component):
         # print ("Arm: ", arm, "Residual: ", residual)
         if residual > 6:
             bad_sensor = arm
-            penalty = self.calculate_penalty(distances[arm][0], arm)
+            penalty = self.calculate_penalty(self.distances[arm][0], arm)
 
         # print("Bad sensor: ", bad_sensor)
         model.update(arm, readings[arm], penalty)
@@ -66,7 +71,7 @@ class Analyzer(Component):
         #************************************************
 
         index = 0
-        for (actual_distance, sensor_distance) in distances:
+        for (actual_distance, sensor_distance) in self.distances:
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = target_speed + (sensor_distance - ideal_distance)
 
@@ -101,7 +106,7 @@ class Analyzer(Component):
         knowledge = Knowledge()
         ideal_distance = knowledge.ideal_distance
         starting_speeds = knowledge.starting_speeds
-        locations = knowledge.locations.copy()
+        locations = self.locations
         target_speed = knowledge.target_speed
 
         locations[0] += target_speed

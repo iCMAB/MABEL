@@ -88,7 +88,7 @@ class ACVUpdater(Observable):
         """Updates the distances between the ACVs and sends the data to the MAPE-K loop to determine speed adaptation."""
 
         knowledge = Knowledge()
-        distances = list()
+        actual_distances = list()
         speeds = list()
         locations = list()
 
@@ -108,12 +108,11 @@ class ACVUpdater(Observable):
             
             acv.distance = modded_distance
 
-            distances.append((actual_distance, modded_distance))
+            actual_distances.append(actual_distance)
             speeds.append(acv.speed)
-            
         
         # Send distance and speed data for all ACVs except lead to MAPE-K loop
-        self.notify(distances, speeds, locations)
+        self.notify(self.acvs, actual_distances)
     
     def mod_distance(self, distance, index) -> float:
         """

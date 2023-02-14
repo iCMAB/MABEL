@@ -21,7 +21,7 @@ class Monitor(Observer, Component):
 
         self.analyzer = analyzer
 
-    def update(self, distances: list, speeds: list, locations: list):
+    def update(self, acvs: list, actual_distances: list):
         """
         Sends a copy of the distances and speeds to be executed on
         
@@ -30,9 +30,9 @@ class Monitor(Observer, Component):
             speeds (list): List of  speeds for each relevant ACV
         """
 
-        self.execute(distances.copy(), speeds.copy(), locations.copy())
+        self.execute(acvs.copy(), actual_distances.copy())
 
-    def execute(self, distances: list, speeds: list, locations: list):
+    def execute(self, acvs: list, actual_distances: list):
         """
         Updates knowledge with speeds and sends the distances and speeds to the analyzer
         
@@ -42,8 +42,9 @@ class Monitor(Observer, Component):
         """
 
         knowledge = Knowledge()
-        knowledge.starting_speeds = speeds
-        knowledge.locations = locations
+        knowledge.actual_distances = actual_distances
+        knowledge.starting_speeds = [acv.speed for acv in acvs]
+        # knowledge.locations = locations
 
-        self.analyzer.execute(distances)
+        self.analyzer.execute(acvs)
         

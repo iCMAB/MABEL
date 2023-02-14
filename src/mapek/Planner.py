@@ -26,6 +26,7 @@ class Planner(Component):
 
         knowledge = Knowledge()
         starting_speeds = knowledge.starting_speeds
+        starting_speeds.pop(0) # Remove lead ACV's starting speed
 
         confidence_threshold = 0.5  # TODO: Decide how to handle this value
 
@@ -48,6 +49,8 @@ class Planner(Component):
 
             normal_modifier = new_speed - starting_speeds[index]
             predicted_modifier = knowledge.target_speed - starting_speeds[index]  # Defaults to target speed if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
+
+            # print(new_speed, " - ", starting_speeds[index], " = ", normal_modifier)
 
             modifier_to_add = normal_modifier
             penalty_to_incur = sensor_penalty
