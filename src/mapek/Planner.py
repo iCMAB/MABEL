@@ -70,4 +70,5 @@ class Planner(Component):
             baseline_penalties.append(sensor_penalty)
             baseline_regrets.append(baseline_regret)
 
+        print(chosen_penalties)
         self.executer.execute(speed_modifiers, chosen_penalties, regrets, baseline_penalties, baseline_regrets, acvs_ignoring_sensor)
