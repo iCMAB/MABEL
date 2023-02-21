@@ -8,6 +8,7 @@ from mapek.Executer import Executer
 from subject.ACVUpdater import ACVUpdater
 
 from ml_models.linearUCB import LinearUCB
+from ml_models.linearTS import LinearThompsonSampling
 
 def run_simulation():
     """Runs the ACV simulation."""
@@ -17,7 +18,9 @@ def run_simulation():
 
     d = 1
     alpha = 0.1
-    knowledge.model = LinearUCB(d, alpha)
+    # knowledge.model = LinearUCB(d, alpha)
+
+    knowledge.model = LinearThompsonSampling(d)
 
     updater = ACVUpdater()
 
@@ -25,6 +28,7 @@ def run_simulation():
     planner = Planner(executer)
     analyzer = Analyzer(planner)
     monitor = Monitor(analyzer)
+
 
     updater.register(monitor)
     updater.read_data()
