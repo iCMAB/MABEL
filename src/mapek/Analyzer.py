@@ -59,9 +59,9 @@ class Analyzer(Component):
         arm = model.select_arm(readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
-                
-        residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print("Arm" + str(arm), "Residual: " + str(residual))
+        predicted = np.dot(model.theta[arm], readings[arm])[0]
+        
+        residual = abs(penalty - predicted)
         if residual > 5:
             self.bad_sensor = arm
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
@@ -151,6 +151,6 @@ class Analyzer(Component):
 
         # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
         if ((crash_front or crash_back) and (sensor_altered or self.bad_sensor == index)):
-            penalty = 1000000 
+            penalty = 1000 
 
         return penalty
