@@ -3,11 +3,7 @@ from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 
 from copy import deepcopy
-
-import subject
-
 import numpy as np
-import math
 
 class Analyzer(Component):
     """
@@ -63,9 +59,9 @@ class Analyzer(Component):
         arm = model.select_arm(readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
-                
-        residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print("Arm" + str(arm), "Residual: " + str(residual))
+        predicted = np.dot(model.theta[arm], readings[arm])[0]
+        
+        residual = abs(penalty - predicted)
         if residual > 5:
             self.bad_sensor = arm
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
@@ -123,6 +119,8 @@ class Analyzer(Component):
         # Penalty (P) = variation (V) from desired ^2 → P = V^2
         penalty = pow(distance - ideal_distance, 2)
 
+        acv_index = index + 1
+
         # Crash penalty calculation
         for (i, acv) in enumerate(acvs):
             if (i == 0):
@@ -132,26 +130,27 @@ class Analyzer(Component):
             sensor_distance = acv.distance
 
             # Use sensor distance for all except the specified index, in which case use the distance value given as a parameter
-            dist = sensor_distance if index != i else distance
+            dist = sensor_distance if acv_index != i else distance
             
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
-            new_speed = target_speed + (dist - ideal_distance)
+            if self.bad_sensor != None and index == self.bad_sensor:
+                new_speed = target_speed + (knowledge.actual_distances[index] - ideal_distance)
+            else:
+                new_speed = target_speed + (dist - ideal_distance)
+            
             modifier = new_speed - acv.target_speed
-
             acv.update(modifier)
 
         locations = [acv.location for acv in acvs]
 
-        acv_index = index + 1
-
         crash_front = False if (acv_index == 0) else (locations[acv_index - 1] - locations[acv_index] < 0)
         crash_back = False if (acv_index >= len(locations) - 1) else (locations[acv_index] - locations[acv_index + 1] < 0)
 
-        # We know the sensor was altered if the sensor distance and the actual distance are different
+       # We know the sensor was altered if the sensor distance and the actual distance are different
         sensor_altered = (self.distances[index][0] != self.distances[index][1])
 
         # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
         if ((crash_front or crash_back) and (sensor_altered or self.bad_sensor == index)):
-            penalty = 1000000 
+            penalty = 1000 
 
         return penalty
