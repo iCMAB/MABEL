@@ -2,7 +2,9 @@ import numpy as np
 from scipy.linalg import inv
 import math
 
-class LinearUCB:
+from ml_models.MABModel import MABModel
+
+class LinearUCB(MABModel):
     def __init__(self, d, alpha):
         self.d = d
         self.alpha = alpha
@@ -10,7 +12,9 @@ class LinearUCB:
         self.b = [np.zeros((d, 1))] * 4
         self.theta = [np.zeros((d, 1))] * 4
 
-    def select_arm(self, readings):
+    def select_arm(self, **kwargs):
+        readings = kwargs.get("readings", None)
+
         # Calculate the upper confidence bound for each arm
         length = len(readings)
         ucb = [0] * length

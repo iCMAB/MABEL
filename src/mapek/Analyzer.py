@@ -55,15 +55,11 @@ class Analyzer(Component):
 
         readings = [acv.distance for acv in trailing_acvs]
 
-        d = 1
-        alpha = 0.1
-        # model = LinearUCB(d, alpha)
-        # To-do make this change
+
         model = knowledge.model
 
         self.bad_sensor = None
-        arm = model.select_arm()
-        print(arm, readings)
+        arm = model.select_arm(readings=readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
         predicted = np.dot(model.theta[arm], readings[arm])[0]
