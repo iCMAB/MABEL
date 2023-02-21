@@ -16,13 +16,16 @@ def run_simulation():
     knowledge = Knowledge()
     knowledge.ideal_distance = subject.IDEAL_DISTANCE
 
-    d = 1
-    alpha = 0.1
+    # d = 1
+    # alpha = 0.1
     # knowledge.model = LinearUCB(d, alpha)
 
     # knowledge.model = LinearThompsonSampling(d)
+
+    # Epsilon Greedy Bernoulli MAB
     epsilonVal = 0.1
-    knowledge.model = BernoulliEpsilon(epsilonVal)
+    d = 1
+    knowledge.model = BernoulliEpsilon(d,epsilonVal)
 
     updater = ACVUpdater()
 

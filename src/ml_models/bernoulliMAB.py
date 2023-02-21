@@ -1,12 +1,10 @@
 import numpy as np
 
 class BernoulliEpsilon:
-    def __init__(self, epsilon):
+    def __init__(self, d, epsilon):
         self.epsilon = epsilon
-        self.values = []
-
-    def initialize(self, num_arms):
-        self.values = np.zeros(num_arms)
+        self.d  = d
+        self.values = [np.identity(d)] * 4
 
     def select_arm(self):
         if np.random.rand() < self.epsilon:
@@ -17,4 +15,4 @@ class BernoulliEpsilon:
             return np.argmax(self.values)
 
     def update(self, arm, reward):
-        self.values[arm] += (reward - self.values[arm]) / (self.num_pulls[arm] + 1)
+        self.values[arm] += (reward - self.values[arm]) / (reward + 1)

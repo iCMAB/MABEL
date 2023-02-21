@@ -3,9 +3,6 @@ from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 from copy import deepcopy
 import numpy as np
-from ml_models.linearUCB import LinearUCB
-from ml_models.linearTS import LinearThompsonSampling
-from ml_models.bernoulliMAB import BernoulliEpsilon
 
 class Analyzer(Component):
     """
@@ -59,18 +56,20 @@ class Analyzer(Component):
 
         self.bad_sensor = None
         arm = model.select_arm()
-        reward = np.random.binomial(1, readings[arm])
+        print("Arm value is "+str(arm))
+        # print(readings[arm])
+        reward = np.random.beta(1, readings[arm])
         # print(arm, readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
         
         # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
         
-        residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
+        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
         # print("Arm" + str(arm), "Residual: " + str(residual))
-        if residual > 5:
-            self.bad_sensor = arm
-            penalty = self.calculate_penalty(self.distances[arm][1], arm)
+        # if residual > 5:
+        #     self.bad_sensor = arm
+        #     penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
         model.update(arm, reward)
         self.iteration += 1
