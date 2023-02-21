@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.linalg import inv
 
 class LinearThompsonSampling:
     def __init__(self, d):

@@ -1,14 +1,11 @@
 from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
-
 from copy import deepcopy
-
-import subject
-
 import numpy as np
 from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
+from ml_models.bernoulliMAB import BernoulliEpsilon
 
 class Analyzer(Component):
     """
@@ -58,15 +55,12 @@ class Analyzer(Component):
 
         readings = [acv.distance for acv in trailing_acvs]
 
-        d = 1
-        alpha = 0.1
-        # model = LinearUCB(d, alpha)
-        # To-do make this change
         model = knowledge.model
 
         self.bad_sensor = None
         arm = model.select_arm()
-        print(arm, readings)
+        reward = np.random.binomial(1, readings[arm])
+        # print(arm, readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
         
@@ -78,7 +72,7 @@ class Analyzer(Component):
             self.bad_sensor = arm
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
-        model.update(arm, readings[arm], penalty)
+        model.update(arm, reward)
         self.iteration += 1
 
         # ************************************************

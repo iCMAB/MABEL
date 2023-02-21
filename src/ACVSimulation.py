@@ -6,9 +6,9 @@ from mapek.Analyzer import Analyzer
 from mapek.Planner import Planner
 from mapek.Executer import Executer
 from subject.ACVUpdater import ACVUpdater
-
 from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
+from ml_models.bernoulliMAB import BernoulliEpsilon
 
 def run_simulation():
     """Runs the ACV simulation."""
@@ -20,7 +20,9 @@ def run_simulation():
     alpha = 0.1
     # knowledge.model = LinearUCB(d, alpha)
 
-    knowledge.model = LinearThompsonSampling(d)
+    # knowledge.model = LinearThompsonSampling(d)
+    epsilonVal = 0.1
+    knowledge.model = BernoulliEpsilon(epsilonVal)
 
     updater = ACVUpdater()
 
