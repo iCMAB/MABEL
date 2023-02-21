@@ -15,13 +15,12 @@ class LinearUCB:
         length = len(readings)
         ucb = [0] * length
         for i in range(length):
-            # theta = np.linalg.inv(self.A[i]).dot(self.b[i])
             x = np.array(readings[i]).reshape(-1, 1)
             ucb[i] = np.dot(self.theta[i].T, x) + self.alpha * math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x)))
+            # print(ucb[i][0][0],":", "Dot(" + str(self.theta[i].T[0][0]) + ", " + str(x[0][0]) + ")","-", self.alpha,"*",math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x))))
 
         # Select the arm with the highest upper confidence bound
-        # print("UCB: ", ucb)
-        return np.argmax(ucb)
+        return np.argmin(ucb)
 
     def update(self, arm, x, penalty):
         x = np.array(x).reshape(-1, 1)
