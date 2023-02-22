@@ -57,19 +57,19 @@ class Analyzer(Component):
         self.bad_sensor = None
         arm = model.select_arm()
         print("Arm value is "+str(arm))
-        # print(readings[arm])
-        reward = np.random.beta(1, readings[arm])
+        print(readings)
+        reward = np.random.beta(1,abs( readings[arm]))
         # print(arm, readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
         
-        # residual = abs(penalty - np.dot(model.theta[arm], readings[arm]))[0]
+        residual = abs(penalty - np.dot(model.values[arm], readings[arm]))[0]
         
         # residual = abs(penalty - np.dot(model.theta[arm], readings[arm])[0])
-        # print("Arm" + str(arm), "Residual: " + str(residual))
-        # if residual > 5:
-        #     self.bad_sensor = arm
-        #     penalty = self.calculate_penalty(self.distances[arm][1], arm)
+        print("Arm" + str(arm), "Residual: " + str(residual))
+        if residual > 5:
+            self.bad_sensor = arm
+            penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
         model.update(arm, reward)
         self.iteration += 1
