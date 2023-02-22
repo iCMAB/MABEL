@@ -9,7 +9,7 @@ class BernoulliEpsilon:
     def select_arm(self):
         if np.random.rand() < self.epsilon:
             # Explore: Choose a random arm with probability epsilon
-            return np.random.randint(len(self.values))
+            return np.random.randint(0,len(self.values)-1)
         else:
             # Exploit: Choose the arm with the highest estimated value
             return np.argmax(self.values)
