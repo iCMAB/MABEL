@@ -23,7 +23,7 @@ def run_simulation():
     # knowledge.model = LinearThompsonSampling(d)
 
     # Epsilon Greedy Bernoulli MAB
-    epsilonVal = 0.1
+    epsilonVal = 0.5
     d = 1
     knowledge.model = BernoulliEpsilon(d,epsilonVal)
 
