@@ -41,7 +41,7 @@ class Logger:
         self.num_acv_columns = (len(acvs) - 1) * 3
         self.row_template = self.get_row_template()
 
-        self.model_name = knowledge.model.__class__.__name__
+        self.model_name = knowledge.mab_model.__class__.__name__
         self.acvs_ignoring_sensor = list()
 
     def get_row_template(self) -> str:

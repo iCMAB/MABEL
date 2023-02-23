@@ -16,18 +16,14 @@ class Planner(Component):
 
     def execute(self, new_speeds: list, penalties: list, bad_sensor: int, trailing_acvs: list):
         """
-        Calculates what to modify the current ACV speeds by based on the confidence measurement and sends it along with the penaly and regret incurred to the executer
+        Calculates what to modify the current ACV speeds by and sends the modifications, penalties and regrets incurred, baseline penalties/regrets, and the ACV being ignored to the executer
         
         Args:
             new_speeds (list): List of desired speeds for each ACV
             penalties (list): List of tuples containing the penalty for the distance sensor value and actual distance vlaue respectively for each ACV. 
-            confidences (list): List of confidence values for each ACV measuring the confidence in this iteration's distance sensor value 
+            bad_sensor (int): The index of the trailing ACV with the bad sensor reading (index of 0 will correspond to ACV1)
+            trailing_acvs (list): List of all trailing ACVs (ACV1 and beyond)
         """
-
-        knowledge = Knowledge()
-        starting_speeds = knowledge.starting_speeds
-
-        confidence_threshold = 0.5  # TODO: Decide how to handle this value
 
         # Speed modifier will be added to current ACV speed to get the desired speed
         speed_modifiers = list()
@@ -52,8 +48,6 @@ class Planner(Component):
             modifier_to_add = normal_modifier
             penalty_to_incur = sensor_penalty
 
-            # If confidence is low enough, go with the predicted value instead of the value from the distance sensor
-            # if confidences[index] < confidence_threshold:
             if bad_sensor != None and index == bad_sensor:
                 modifier_to_add = predicted_modifier
                 penalty_to_incur = actual_penalty

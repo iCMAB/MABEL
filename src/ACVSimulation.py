@@ -24,7 +24,7 @@ def run_simulation():
 
     d = 1
     alpha = 0.1
-    knowledge.model = model(d=d, alpha=alpha)
+    knowledge.mab_model = model(d=d, alpha=alpha)
 
     updater = ACVUpdater()
     

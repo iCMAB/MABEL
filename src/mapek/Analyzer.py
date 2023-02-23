@@ -13,6 +13,10 @@ class Analyzer(Component):
 
     Attributes:
         planner (Planner): The planner component of the MAPE-K loop
+        distances (list): List of distances from each trailing ACV
+        locations (list): List of locations of each ACV
+        acvs (list): List of all ACVs
+        bad_sensor (int): The index of the trailing ACV with the bad sensor reading (index of 0 will correspond to ACV1)
     """
 
     def __init__(self, planner: Planner):
@@ -24,18 +28,19 @@ class Analyzer(Component):
         """
 
         self.planner = planner
+
         self.distances = list()
         self.locations = list()
         self.acvs = list()
-        self.iteration = 0
         self.bad_sensor = None
 
     def execute(self, acvs: list):
         """
-        Calculates the new speed, the potential penalties incurred, and the confidence of the distance readings for each ACV and sends them to the planner
+        Calculates the new speed and penalty incurred by each trailing ACV, as well as whether or not there is a bad sensor this 
+        iteration, and sends all information to the planner
         
         Args:
-            distances (list): List of distances from the sensors for each ACV
+            acvs (list): List of all ACVs
         """
 
         knowledge = Knowledge()
@@ -60,28 +65,27 @@ class Analyzer(Component):
 
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
-            predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
             actual_speed = knowledge.target_speed + (actual_distance - ideal_distance)
+            
+            # Predicted speed may be used in the future
+            predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
             actual_penalty = self.calculate_penalty(actual_distance, index)
-            
-            # TODO: In the future, the chosen ML model will determine the confidence value of the distance reading.
-            # For now, ACVs are always fully confidenct that the distance is correct.
-            # confidence = 1
 
             new_speeds.append((new_speed, actual_speed))
             penalties.append((sensor_penalty, actual_penalty)) 
-            # confidences.append(confidence)
 
             index += 1
 
         self.planner.execute(new_speeds, penalties, self.bad_sensor, trailing_acvs)
         
     def handle_bad_sensor_detection(self):
+        """Finds if there is a bad sensor reading using the chosen MAB model and updates the model's parameters"""
+        
         knowledge = Knowledge()
-        model = knowledge.model
+        model = knowledge.mab_model
         self.bad_sensor = None
 
         trailing_acvs = self.acvs[1:]
@@ -100,11 +104,11 @@ class Analyzer(Component):
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
         model.update(arm, readings[arm], penalty)
-        self.iteration += 1
 
     def calculate_penalty(self, distance, index) -> float:
         """
-        Calculates the penalty using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2 for an ACV given distance between it and the one in front of it
+        Calculates the penalty using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2, as well by predicting crashes, for 
+        an ACV given distance between it and the one in front of it
         
         Args:
             distance (float): What the distance sensor percieves is the distance between the given ACV and the one in front of it
