@@ -28,8 +28,8 @@ class Monitor(Observer, Component):
         Sends a copy of the distances and speeds to be executed on
         
         Args:
-            distances (list): List of distances from the sensors for each relevant ACV
-            speeds (list): List of  speeds for each relevant ACV
+            acvs (list): List of all ACVs
+            actual_distances (list): List of unmodified distance for each trailing ACV
         """
 
         acvs_copy = deepcopy(acvs)
@@ -40,15 +40,12 @@ class Monitor(Observer, Component):
         Updates knowledge with speeds and sends the distances and speeds to the analyzer
         
         Args:
-            distances (list): List of distances from the sensors for each relevant ACV
-            starting_speeds (list): List of starting speeds for each relevant ACV
+            acvs (list): List of all ACVs
+            actual_distances (list): List of unmodified distance for each trailing ACV
         """
 
         knowledge = Knowledge()
         knowledge.actual_distances = actual_distances
-        knowledge.starting_speeds = [acv.speed for acv in acvs]
-        knowledge.starting_speeds.pop(0) # Remove lead ACV's speed, not relevant
-        # knowledge.locations = locations
 
         self.analyzer.execute(acvs)
         
