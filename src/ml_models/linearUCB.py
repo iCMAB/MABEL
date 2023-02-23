@@ -8,9 +8,9 @@ class LinearUCB(MABModel):
     def __init__(self, d, alpha):
         self.d = d
         self.alpha = alpha
-        self.A = [np.identity(d)] * 4
-        self.b = [np.zeros((d, 1))] * 4
-        self.theta = [np.zeros((d, 1))] * 4
+        self.A = [np.identity(d)] * 3
+        self.b = [np.zeros((d, 1))] * 3
+        self.theta = [np.zeros((d, 1))] * 3
 
     def select_arm(self, **kwargs):
         readings = kwargs.get("readings", None)
@@ -21,10 +21,9 @@ class LinearUCB(MABModel):
         for i in range(length):
             x = np.array(readings[i]).reshape(-1, 1)
             ucb[i] = np.dot(self.theta[i].T, x) + self.alpha * math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x)))
-            # print(ucb[i][0][0],":", "Dot(" + str(self.theta[i].T[0][0]) + ", " + str(x[0][0]) + ")","-", self.alpha,"*",math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x))))
 
         # Select the arm with the highest upper confidence bound
-        return np.argmin(ucb)
+        return np.argmax(ucb)
 
     def update(self, arm, x, penalty):
         x = np.array(x).reshape(-1, 1)
