@@ -43,8 +43,13 @@ def select_model():
     for i, model in enumerate(model_options):
         print(f"{i + 1}. {model[0]}")
 
-    selection = int(input("\nSelection: "))
-    return model_options[selection - 1][1]
+    print()
+
+    selection = ""
+    while (not selection.isdigit()) or (int(selection) not in range(1, len(model_options) + 1)):
+        selection = input("Selection: ")
+
+    return model_options[int(selection) - 1][1]
 
 if __name__ == '__main__':
     run_simulation()
