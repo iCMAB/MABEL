@@ -42,37 +42,15 @@ class Analyzer(Component):
 
         self.acvs = acvs
         trailing_acvs = acvs[1:]
-
         self.distances = [(acv.distance, knowledge.actual_distances[i]) for (i, acv) in enumerate(trailing_acvs)]
         self.locations = [acv.location for acv in acvs]
+
+        self.handle_bad_sensor_detection()
 
         ideal_distance = knowledge.ideal_distance
 
         new_speeds = list()
         penalties = list()
-
-        # ********************LINUCB*********************
-
-        readings = [acv.distance for acv in trailing_acvs]
-
-
-        model = knowledge.model
-
-        self.bad_sensor = None
-        arm = model.select_arm(readings=readings)
-
-        penalty = self.calculate_penalty(readings[arm], arm)
-        predicted = np.dot(model.theta[arm], readings[arm])[0]
-        
-        residual = abs(penalty - predicted)
-        if residual > 5:
-            self.bad_sensor = arm
-            penalty = self.calculate_penalty(self.distances[arm][1], arm)
-
-        model.update(arm, readings[arm], penalty)
-        self.iteration += 1
-
-        # ************************************************
 
         index = 0
         for (index, acv) in enumerate(trailing_acvs):
@@ -101,7 +79,29 @@ class Analyzer(Component):
 
         self.planner.execute(new_speeds, penalties, self.bad_sensor, trailing_acvs)
         
-    # TODO: Penalty calculation and crash detection does not take into account the predicted distance if the sensor is ignored
+    def handle_bad_sensor_detection(self):
+        knowledge = Knowledge()
+        model = knowledge.model
+        self.bad_sensor = None
+
+        trailing_acvs = self.acvs[1:]
+        readings = [acv.distance for acv in trailing_acvs]        
+        
+        arm = model.select_arm(readings=readings)
+
+        penalty = self.calculate_penalty(readings[arm], arm)
+        predicted_penalty = np.dot(model.theta[arm], readings[arm])[0]
+        
+        residual = abs(penalty - predicted_penalty)
+        if residual > 5:
+            self.bad_sensor = arm
+
+            # New penalty with actual, unmodified distance
+            penalty = self.calculate_penalty(self.distances[arm][1], arm)
+
+        model.update(arm, readings[arm], penalty)
+        self.iteration += 1
+
     def calculate_penalty(self, distance, index) -> float:
         """
         Calculates the penalty using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2 for an ACV given distance between it and the one in front of it
