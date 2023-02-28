@@ -8,35 +8,47 @@ from mapek.Executer import Executer
 from subject.ACVUpdater import ACVUpdater
 from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
-from ml_models.bernoulliMAB import BernoulliEpsilon
+
+model_options = [
+    ('LinearUCB', LinearUCB), 
+    ('LinearThompsonSampling', LinearThompsonSampling)
+]
 
 def run_simulation():
     """Runs the ACV simulation."""
     
     knowledge = Knowledge()
     knowledge.ideal_distance = subject.IDEAL_DISTANCE
+    model = select_model()      
 
-    # d = 1
-    # alpha = 0.1
-    # knowledge.model = LinearUCB(d, alpha)
-
-    # knowledge.model = LinearThompsonSampling(d)
-
-    # Epsilon Greedy Bernoulli MAB
-    epsilonVal = 0.5
     d = 1
-    knowledge.model = BernoulliEpsilon(d,epsilonVal)
+    alpha = 0.1
+    knowledge.mab_model = model(d=d, alpha=alpha)
 
     updater = ACVUpdater()
-
+    
     executer = Executer(updater)
     planner = Planner(executer)
     analyzer = Analyzer(planner)
     monitor = Monitor(analyzer)
 
-
     updater.register(monitor)
     updater.read_data()
+
+def select_model():
+    """Selects the model to use for the simulation."""
+    
+    print("\nSelect a model:\n")
+    for i, model in enumerate(model_options):
+        print(f"{i + 1}. {model[0]}")
+
+    print()
+
+    selection = ""
+    while (not selection.isdigit()) or (int(selection) not in range(1, len(model_options) + 1)):
+        selection = input("Selection: ")
+
+    return model_options[int(selection) - 1][1]
 
 if __name__ == '__main__':
     run_simulation()

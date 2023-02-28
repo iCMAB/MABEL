@@ -1,15 +1,20 @@
 import numpy as np
 import math
 
-class LinearUCB:
-    def __init__(self, d, alpha):
-        self.d = d
-        self.alpha = alpha
-        self.A = [np.identity(d)] * 4
-        self.b = [np.zeros((d, 1))] * 4
-        self.theta = [np.zeros((d, 1))] * 4
+from ml_models.MABModel import MABModel
 
-    def select_arm(self, readings):
+class LinearUCB(MABModel):
+    def __init__(self, **kwargs):
+        self.d = kwargs.get('d')
+        self.alpha = kwargs.get('alpha')
+        
+        self.A = [np.identity(self.d)] * 4
+        self.b = [np.zeros((self.d, 1))] * 4
+        self.theta = [np.zeros((self.d, 1))] * 4
+
+    def select_arm(self, **kwargs):
+        readings = kwargs.get('readings')
+
         # Calculate the upper confidence bound for each arm
         length = len(readings)
         ucb = [0] * length
@@ -22,8 +27,12 @@ class LinearUCB:
         # print("UCB: ", ucb)
         return np.argmax(ucb)
 
-    def update(self, arm, x, penalty):
+    def update(self, **kwargs):
+        arm = kwargs.get('arm')
+        x = kwargs.get('x')
+        penalty = kwargs.get('penalty')
+
         x = np.array(x).reshape(-1, 1)
-        self.A[arm] += np.dot(x, x.T)
-        self.b[arm] -= penalty * x
+        self.A[arm] = self.A[arm] + np.dot(x, x.T)
+        self.b[arm] = self.b[arm] - (penalty * x)
         self.theta[arm] = np.linalg.inv(self.A[arm]).dot(self.b[arm])

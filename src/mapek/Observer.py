@@ -9,7 +9,7 @@ class Observer(ABC):
         Generic update method for observers to be overridden.
         
         Args:
-            distances (list): List of distances from the sensors for each relevant ACV
-            starting_speeds (list): List of starting speeds for each relevant ACV
+            acvs (list): List of all ACVs
+            actual_distances (list): List of unmodified distance for each trailing ACV
         """
         pass

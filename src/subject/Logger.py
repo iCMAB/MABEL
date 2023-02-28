@@ -2,6 +2,7 @@ import subject, itertools, colorama
 
 from tabulate import tabulate
 
+from mapek.Knowledge import Knowledge
 class Logger:
     """
     Used to log a visual representation of the ACV simulation to the console
@@ -29,6 +30,7 @@ class Logger:
             iterations_to_mod (dict): A dictionary of iterations to modify and the amount to modify them by
         """
         colorama.init()
+        knowledge = Knowledge()
         
         self.acvs = acvs
         self.iterations_to_mod = iterations_to_mod
@@ -39,6 +41,7 @@ class Logger:
         self.num_acv_columns = (len(acvs) - 1) * 3
         self.row_template = self.get_row_template()
 
+        self.model_name = knowledge.mab_model.__class__.__name__
         self.acvs_ignoring_sensor = list()
 
     def get_row_template(self) -> str:
@@ -151,11 +154,12 @@ class Logger:
 
         # Print out ideal distance and which iterations will be modified
         print("=====================================\n")
-        print("• ACV Count: " + str(len(self.acvs)))
+        print("• MAB model: " + self.model_name)
+        print("• ACV count: " + str(len(self.acvs)))
         print("• Ideal distance: " + str(subject.IDEAL_DISTANCE))
-        print("• Total Iterations: " + str(subject.ITERATIONS))
-        print("• Distance modification iterations: ", 
-            *["\n   > " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
+        print("• Total iterations: " + str(subject.ITERATIONS))
+        print("• Iterations Being modified: ", 
+            *["\n   > Iter. " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
         print("\nPress enter to continue...")
         input()
@@ -209,7 +213,7 @@ class Logger:
         penalty_improvement = round_two_decimals((float(avg_baseline_penalty) - float(avg_penalty)) / float(avg_baseline_penalty) * 100)
         regret_improvement = round_two_decimals((float(total_baseline_regret) - float(total_regret)) / float(total_baseline_regret) * 100)
 
-        print("\nLinUCB Metrics:")
+        print("\n" + self.model_name + " Metrics:")
         print("• Total crashes: " + str(crashes))
         
         print("• Average penalty:\t\tAverage baseline penalty:")
