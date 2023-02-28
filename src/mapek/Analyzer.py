@@ -56,8 +56,6 @@ class Analyzer(Component):
 
         self.bad_sensor = None
         arm = model.select_arm()
-        print("Arm value is "+str(arm))
-        print(readings)
 
         # Variation from desired distance - ACV Specific
         penalty = self.calculate_penalty(readings[arm], arm)
@@ -65,7 +63,6 @@ class Analyzer(Component):
         predicted = np.dot(model.theta[arm], readings[arm])[0]
         
         residual = abs(penalty - predicted)
-        print("Arm" + str(arm), "Residual: " + str(residual))
         if residual > 5:
             self.bad_sensor = arm
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
