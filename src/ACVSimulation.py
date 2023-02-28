@@ -9,28 +9,33 @@ from subject.ACVUpdater import ACVUpdater
 
 from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
-from ml_models.bernoulliEpsilon import BernoulliEpsilon
+from ml_models.EpsilonGreedy import EpsilonGreedy
+from ml_models.UCB1 import UCB1_Normal_Penalized
 
 model_options = [
-    ('LinearUCB', LinearUCB), 
+    ('LinearUCB', LinearUCB),
     ('LinearThompsonSampling', LinearThompsonSampling),
-    ('BernoulliEpsilon', BernoulliEpsilon),
+    ('BernoulliEpsilon', EpsilonGreedy),
+    ('UCB1', UCB1_Normal_Penalized),
 ]
+
 
 def run_simulation():
     """Runs the ACV simulation."""
-    
+
     knowledge = Knowledge()
     knowledge.ideal_distance = subject.IDEAL_DISTANCE
-    model = select_model()      
+    model = select_model()
 
     d = 1
     alpha = 0.1
     epsilon = 0.5
-    knowledge.mab_model = model(d=d, alpha=alpha, epsilon=epsilon)
+    n_arms = 3
+    knowledge.mab_model = model(
+        d=d, alpha=alpha, epsilon=epsilon, n_arms=n_arms)
 
     updater = ACVUpdater()
-    
+
     executer = Executer(updater)
     planner = Planner(executer)
     analyzer = Analyzer(planner)
@@ -39,9 +44,10 @@ def run_simulation():
     updater.register(monitor)
     updater.read_data()
 
+
 def select_model():
     """Selects the model to use for the simulation."""
-    
+
     print("\nSelect a model:\n")
     for i, model in enumerate(model_options):
         print(f"{i + 1}. {model[0]}")
@@ -53,6 +59,7 @@ def select_model():
         selection = input("Selection: ")
 
     return model_options[int(selection) - 1][1]
+
 
 if __name__ == '__main__':
     run_simulation()
