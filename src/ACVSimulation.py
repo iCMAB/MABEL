@@ -10,9 +10,11 @@ from subject.ACVUpdater import ACVUpdater
 from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
 from ml_models.bernoulliEpsilon import BernoulliEpsilon
+from ml_models.UCB1 import UCB1
 
 model_options = [
     ('LinearUCB', LinearUCB), 
+    ('UCB1', UCB1),
     ('LinearThompsonSampling', LinearThompsonSampling),
     ('BernoulliEpsilon', BernoulliEpsilon),
 ]
