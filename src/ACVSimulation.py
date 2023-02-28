@@ -9,10 +9,12 @@ from subject.ACVUpdater import ACVUpdater
 
 from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
+from ml_models.bernoulliEpsilon import BernoulliEpsilon
 
 model_options = [
     ('LinearUCB', LinearUCB), 
-    ('LinearThompsonSampling', LinearThompsonSampling)
+    ('LinearThompsonSampling', LinearThompsonSampling),
+    ('BernoulliEpsilon', BernoulliEpsilon),
 ]
 
 def run_simulation():
@@ -24,7 +26,8 @@ def run_simulation():
 
     d = 1
     alpha = 0.1
-    knowledge.mab_model = model(d=d, alpha=alpha)
+    epsilon = 0.5
+    knowledge.mab_model = model(d=d, alpha=alpha, epsilon=epsilon)
 
     updater = ACVUpdater()
     
