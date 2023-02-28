@@ -14,9 +14,9 @@ from ml_models.UCB1 import UCB1_Normal_Penalized
 
 model_options = [
     ('LinearUCB', LinearUCB),
-    ('UCB1', UCB1_Normal_Penalized),
     ('LinearThompsonSampling', LinearThompsonSampling),
     ('BernoulliEpsilon', EpsilonGreedy),
+    ('UCB1', UCB1_Normal_Penalized),
 ]
 
 

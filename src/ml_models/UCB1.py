@@ -6,6 +6,7 @@ class UCB1_Normal_Penalized(MABModel):
     def __init__(self, **kwargs):
         self.n_arms = kwargs.get('n_arms')
         self.d = kwargs.get('d')
+        
         self.total_selections = 0
         self.theta = [np.identity(self.d)] * self.n_arms
         self.num_selections = [np.identity(self.d)] * self.n_arms
@@ -32,5 +33,6 @@ class UCB1_Normal_Penalized(MABModel):
         """
         arm = kwargs.get('arm')
         penalty = kwargs.get('penalty')
+
         self.theta[arm] = self.theta[arm] + penalty
         self.num_selections[arm] = self.num_selections[arm] + 1
