@@ -1,28 +1,25 @@
 import numpy as np
-from scipy.linalg import inv
 import math
 
-from ml_models.MABModel import MABModel
-
-class LinearUCB(MABModel):
+class LinearUCB:
     def __init__(self, d, alpha):
         self.d = d
         self.alpha = alpha
-        self.A = [np.identity(d)] * 3
-        self.b = [np.zeros((d, 1))] * 3
-        self.theta = [np.zeros((d, 1))] * 3
+        self.A = [np.identity(d)] * 4
+        self.b = [np.zeros((d, 1))] * 4
+        self.theta = [np.zeros((d, 1))] * 4
 
-    def select_arm(self, **kwargs):
-        readings = kwargs.get("readings", None)
-
+    def select_arm(self, readings):
         # Calculate the upper confidence bound for each arm
         length = len(readings)
         ucb = [0] * length
         for i in range(length):
+            # theta = np.linalg.inv(self.A[i]).dot(self.b[i])
             x = np.array(readings[i]).reshape(-1, 1)
             ucb[i] = np.dot(self.theta[i].T, x) + self.alpha * math.sqrt(np.dot(x.T, np.linalg.inv(self.A[i]).dot(x)))
 
         # Select the arm with the highest upper confidence bound
+        # print("UCB: ", ucb)
         return np.argmax(ucb)
 
     def update(self, arm, x, penalty):
