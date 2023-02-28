@@ -103,7 +103,7 @@ class Analyzer(Component):
             # New penalty with actual, unmodified distance
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
-        model.update(arm, readings[arm], penalty)
+        model.update(arm=arm, x=readings[arm], penalty=penalty)
 
     def calculate_penalty(self, distance, index) -> float:
         """

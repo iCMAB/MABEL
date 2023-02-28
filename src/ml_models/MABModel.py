@@ -13,7 +13,7 @@ class MABModel(ABC):
         pass
 
     @abstractmethod
-    def update(arm, x, penalty):
+    def update(**kwargs):
         """
         Implementations will use this method to update the model based on the reading and the penalty incurred
         
