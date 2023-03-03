@@ -1,11 +1,8 @@
 from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
-
 from copy import deepcopy
 import numpy as np
-from ml_models.linearUCB import LinearUCB
-from ml_models.linearTS import LinearThompsonSampling
 
 class Analyzer(Component):
     """

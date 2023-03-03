@@ -8,9 +8,9 @@ class LinearUCB(MABModel):
         self.d = kwargs.get('d')
         self.alpha = kwargs.get('alpha')
         
-        self.A = [np.identity(self.d)] * 4
-        self.b = [np.zeros((self.d, 1))] * 4
-        self.theta = [np.zeros((self.d, 1))] * 4
+        self.A = [np.identity(self.d)] * 3
+        self.b = [np.zeros((self.d, 1))] * 3
+        self.theta = [np.zeros((self.d, 1))] * 3
 
     def select_arm(self, **kwargs):
         readings = kwargs.get('readings')

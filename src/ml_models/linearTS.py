@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.linalg import inv
 
 from ml_models.MABModel import MABModel
 
