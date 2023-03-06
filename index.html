@@ -1,202 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>MABEL</title>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+		/>
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MABEL</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        @import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+			body {
+				margin: 0;
+				box-sizing: border-box;
+			}
 
-        body {
-            margin: 0;
-            box-sizing: border-box;
-        }
+			.container {
+				line-height: 150%;
+			}
 
-        .container {
-            line-height: 150%;
-        }
+			.header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 15px;
+				background-color: #e9e9e9;
+			}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #e9e9e9;
-        }
+			.header h1 {
+				color: #222222;
+				font-size: 30px;
+				font-family: sans-serif;
+			}
 
-        .header h1 {
-            color: #222222;
-            font-size: 30px;
-            font-family: sans-serif;
-        }
+			.header .social a {
+				padding: 0 5px;
+				color: #222222;
+			}
 
-        .header .social a {
-            padding: 0 5px;
-            color: #222222;
-        }
+			.left {
+				float: left;
+				width: 180px;
+				margin: 0;
+				padding: 1em;
+			}
 
-        .left {
-            float: left;
-            width: 180px;
-            margin: 0;
-            padding: 1em;
-        }
+			.left img {
+				display: block;
+				margin: auto;
+			}
 
-        .content {
-            margin-left: 190px;
-            border-left: 1px solid #d4d4d4;
-            padding: 1em;
-            overflow: hidden;
-        }
+			.content {
+				margin-left: 190px;
+				border-left: 1px solid #d4d4d4;
+				padding: 1em;
+				overflow: hidden;
+			}
 
-        ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            font-family: sans-serif;
-        }
+			ul {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				font-family: sans-serif;
+			}
 
-        li a {
-            display: block;
-            color: #000;
-            padding: 8px 16px;
-            text-decoration: none;
-        }
+			li a {
+				display: block;
+				color: #000;
+				padding: 8px 16px;
+				text-decoration: none;
+			}
 
-        li a.active {
-            background-color: #F36917;
-            color: white;
-        }
+			li a.active {
+				background-color: #f36917;
+				color: white;
+			}
 
-        li a:hover:not(.active) {
-            background-color: #29292a;
-            color: white;
-        }
+			li a:hover:not(.active) {
+				background-color: #29292a;
+				color: white;
+			}
 
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-            margin: 30px 0;
-        }
+			table {
+				font-family: arial, sans-serif;
+				border-collapse: collapse;
+				width: 100%;
+				margin: 30px 0;
+			}
 
-        td,
-        th {
-            border: 1px solid #dddddd;
-            padding: 8px;
-        }
+			td,
+			th {
+				border: 1px solid #dddddd;
+				padding: 8px;
+			}
 
-        tr:nth-child(1) {
-            background-color: #F36917;
-            color: white;
-        }
+			tr:nth-child(1) {
+				background-color: #f36917;
+				color: white;
+			}
 
-        tr td i.fas {
-            display: block;
-            font-size: 35px;
-            text-align: center;
-        }
+			tr td i.fas {
+				display: block;
+				font-size: 35px;
+				text-align: center;
+			}
 
-        .footer {
-            padding: 55px 20px;
-            background-color: #2e3550;
-            color: white;
-            text-align: center;
-        }
-    </style>
-</head>
+			.footer {
+				padding: 55px 20px;
+				background-color: #2e3550;
+				color: white;
+				text-align: center;
+			}
+		</style>
+	</head>
 
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>MABEL - Multi-Armed Bandit EvaLuator</h1>
-            <!-- <div class="social">
+	<body>
+		<div class="container">
+			<header class="header">
+				<h1>MABEL - Multi-Armed Bandit EvaLuator</h1>
+				<!-- <div class="social">
                 <a href="#"><i class="fab fa-facebook"></i></a>
                 <a href="#"><i class="fab fa-instagram"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
             </div> -->
-        </header>
-        <aside class="left">
-            <img src="rit.png" width="160px" />
-            <p></p>
-            <ul>
-                <li><a class="active" href="#home">Department of Software Engineering</a></li>
-                <li><a href="#abstract">Abstract</a></li>
-                <li><a href="#code">Code</a></li>
-                <li><a href="#team">Team</a></li>
-            </ul>
-            <br><br>
-        </aside>
-        <main class="content">
-            <h2 id="abstract">Abstract</h2>
-            <p>We present our Multi-Armed Bandit EvaLuator (MABEL) that evaluates several Multi-Armed Bandit (MAB) models for
-            real-world efficacy. This is the first known tool of its kind that can evaluate several MAB models, evaluating their
-            ability to deal with corrupt and missing values. We also present a robust evaluation of several Multi-Armed Bandit (MAB)
-            and Contextual Multi-Armed Bandit (MAB) models.</p>
-            <p>The MABEL tool uses a real-world scenario of autonomous connected vehicles (ACVs). These ACVs rely on sensors and
-            inter-vehicle communication to operate safely and effectively as a fleet. This interconnectedness exposes the ACV system
-            to cyber attacks in which an attacker injecting or manipulating sensor readings for even one vehicle could disrupt the
-            entire ACV system. One approach to filtering out compromised sensor reading is with the use of MAB and CMAB machine
-            learning models to assign penalties from a Gaussian distribution to the ACVs for crashes which often result from
-            trusting data outliers. We researched algorithms that could be applicable and began with Epsilon-greedy, Linear Thompson
-            Sampling, and LinUCB (Upper Confidence Bound). To fairly compare the models while handling the different input
-            requirement, we created the ACV robust simulation MABEL using a MAPE-K adaptation control loop to run 100s of trials. We
-            present our findings applying various MAB/CMAB models to MABEL to serve as a benchmark determining which model would be
-            best suited for sensor outlier identification. The MAB/CMAB algorithm implementations and MABEL will both be presented
-            as well as the findings from the evaluation itself.</p>
-            <p>The findings suggest that while not all MAB algorithms are suited to address the scenario we presented, some models such
-            as LinUCB demonstrate notable success in filtering out compromised sensor readings in ACV systems.</p>
-            <h2 id="code">Code</h2>
-            <p>MABEL is open source and can be access at <a href="https://github.com/iCMAB/iCMAB-SimulationTool/tree/main">MABEL Github.</a></p>
-            <ol>
-                <li>Clone
-                    <pre>git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre>
-                </li>
-                <li>Run
-                    <pre>python3 src/ACVSimulation.py</pre>
-                </li>              
-                <li>The MABEL interface will guide you in the section of an MAB or CMAB model and results will display in the terminal.</li>
-            </ol>
-            <hr><br>
-            <h2 id="team">The Team</h2>
-            <table>
-                <tr>
-                    <th>Kaiy Muhammad</th>
-                    <th>Alex Hetrick</th>
-                    <th>Dr. Daniel Krutz</th>
-                </tr>
-                <tr>
-                    <td>Fourth Year Computer Science student on co-op in robotics R&D. <br> Interested in Autonomous Systems. <br><a href="https://www.linkedin.com/in/kaiy-muhammad/">LinkedIn</a></td>
-                    <td>Second Year Software Engineering student.<br>Interested in X.</td>
-                    <td>Director of the<a href="https://danielkrutz.github.io/AwareLab.html"> AWARE LAB</a> and assistant professor.<br>Interested in Self Adaptive Systems, Strategic Reasoning and Computing Education.</td>
-                </tr>
-                <!-- <tr>
+			</header>
+			<aside class="left">
+				<img src="rit.png" width="160px" />
+				<p></p>
+				<ul>
+					<li>
+						<a class="active" href="#home"
+							>Department of Software Engineering</a
+						>
+					</li>
+					<li><a href="#abstract">Abstract</a></li>
+					<li><a href="#code">Code</a></li>
+					<li><a href="#team">Team</a></li>
+				</ul>
+				<br /><br />
+			</aside>
+			<main class="content">
+				<h2 id="abstract">Abstract</h2>
+				<p>
+					We present our Multi-Armed Bandit EvaLuator (MABEL) that
+					evaluates several Multi-Armed Bandit (MAB) models for
+					real-world efficacy. This is the first known tool of its
+					kind that can evaluate several MAB models, evaluating their
+					ability to deal with corrupt and missing values. We also
+					present a robust evaluation of several Multi-Armed Bandit
+					(MAB) and Contextual Multi-Armed Bandit (MAB) models.
+				</p>
+				<p>
+					The MABEL tool uses a real-world scenario of autonomous
+					connected vehicles (ACVs). These ACVs rely on sensors and
+					inter-vehicle communication to operate safely and
+					effectively as a fleet. This interconnectedness exposes the
+					ACV system to cyber attacks in which an attacker injecting
+					or manipulating sensor readings for even one vehicle could
+					disrupt the entire ACV system. One approach to filtering out
+					compromised sensor reading is with the use of MAB and CMAB
+					machine learning models to assign penalties from a Gaussian
+					distribution to the ACVs for crashes which often result from
+					trusting data outliers. We researched algorithms that could
+					be applicable and began with Epsilon-greedy, Linear Thompson
+					Sampling, and LinUCB (Upper Confidence Bound). To fairly
+					compare the models while handling the different input
+					requirement, we created the ACV robust simulation MABEL
+					using a MAPE-K adaptation control loop to run 100s of
+					trials. We present our findings applying various MAB/CMAB
+					models to MABEL to serve as a benchmark determining which
+					model would be best suited for sensor outlier
+					identification. The MAB/CMAB algorithm implementations and
+					MABEL will both be presented as well as the findings from
+					the evaluation itself.
+				</p>
+				<p>
+					The findings suggest that while not all MAB algorithms are
+					suited to address the scenario we presented, some models
+					such as LinUCB demonstrate notable success in filtering out
+					compromised sensor readings in ACV systems.
+				</p>
+				<h2 id="code">Code</h2>
+				<p>
+					MABEL is open source and can be access at
+					<a
+						href="https://github.com/iCMAB/iCMAB-SimulationTool/tree/main"
+						>MABEL Github.</a
+					>
+				</p>
+				<ol>
+					<li>
+						Clone
+						<pre>
+git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
+						>
+					</li>
+					<li>
+						Run
+						<pre>python3 src/ACVSimulation.py</pre>
+					</li>
+					<li>
+						The MABEL interface will guide you in the section of an
+						MAB or CMAB model and results will display in the
+						terminal.
+					</li>
+				</ol>
+				<h2 id="code">Output</h2>
+				<p>
+					When running MABEL, output will be broken up into three
+					chunks:
+				</p>
+				<hr />
+				<br />
+				<h2 id="team">The Team</h2>
+				<table>
+					<tr>
+						<th>Kaiy Muhammad</th>
+						<th>Alex Hetrick</th>
+						<th>Dr. Daniel Krutz</th>
+					</tr>
+					<tr>
+						<td>
+							Fourth Year Computer Science student on co-op in
+							robotics R&D. <br />
+							Interested in Autonomous Systems. <br /><a
+								href="https://www.linkedin.com/in/kaiy-muhammad/"
+								>LinkedIn</a
+							>
+						</td>
+						<td>
+							Second Year Software Engineering student.<br />
+							Interested in the practical application of software
+							products.<br /><a href="https://ventuar.com/"
+								>Personal Website</a
+							>
+						</td>
+						<td>
+							Director of the<a
+								href="https://danielkrutz.github.io/AwareLab.html"
+							>
+								AWARE LAB</a
+							>
+							and assistant professor.<br />Interested in Self
+							Adaptive Systems, Strategic Reasoning and Computing
+							Education.
+						</td>
+					</tr>
+					<!-- <tr>
                     <td><i class="fas fa-broom"></i></td>
                     <td><i class="fas fa-archive"></i></td>
                     <td><i class="fas fa-trailer"></i></td>
                 </tr> -->
 
-                <tr>
-            </table>
-            <!-- <form>
+					<tr></tr>
+				</table>
+
+				<!-- <form>
                 <label>Email: <input type="text" name="email"></label><br>
                 <label> Mobile: <input type="text" name="mobile"> </label><br>
                 <label>Message: <textarea name="message" rows="5" cols="30"></textarea></label><br>
                 <input type="submit" value="Submit" /><br>
                 <closeform></closeform>
             </form> -->
-        </main>
-        <footer class="footer">
-            <a href="https://danielkrutz.github.io/AwareLab.html"><img src="aware-lab-logo.png" alt="AWARE Lab"></a>
-            <br>
-            <img src="rit.png" width="100px" />
-            <br>
-            <img src="NSF.png" alt="NSF" width="110" height="110">
-        </footer>
-    </div>
-</body>
-
+			</main>
+			<footer class="footer">
+				<a href="https://danielkrutz.github.io/AwareLab.html"
+					><img src="aware-lab-logo.png" alt="AWARE Lab"
+				/></a>
+				<br />
+				<img src="rit.png" width="100px" />
+				<br />
+				<img src="NSF.png" alt="NSF" width="110" height="110" />
+			</footer>
+		</div>
+	</body>
 </html>
