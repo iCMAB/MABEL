@@ -59,7 +59,7 @@
 				overflow: hidden;
 			}
 
-			ul {
+			ul.sidebar {
 				list-style-type: none;
 				margin: 0;
 				padding: 0;
@@ -129,7 +129,7 @@
 			<aside class="left">
 				<img src="rit.png" width="160px" />
 				<p></p>
-				<ul>
+				<ul class="sidebar">
 					<li>
 						<a class="active" href="#home"
 							>Department of Software Engineering</a
@@ -137,6 +137,7 @@
 					</li>
 					<li><a href="#abstract">Abstract</a></li>
 					<li><a href="#code">Code</a></li>
+					<li><a href="#output">Output</a></li>
 					<li><a href="#team">Team</a></li>
 				</ul>
 				<br /><br />
@@ -207,11 +208,125 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 						terminal.
 					</li>
 				</ol>
-				<h2 id="code">Output</h2>
+				<h2 id="output">Output</h2>
 				<p>
-					When running MABEL, output will be broken up into three
-					chunks:
+					When running MABEL, output will be broken up into four
+					discrete sections:
 				</p>
+				<h3>1. Model Selection</h3>
+				<img src="select-model.png" /><br />
+				<p>
+					The MABEL interface will prompt you to select from a list of
+					MAB models to test.
+				</p>
+				<h3>2. Starting Information</h3>
+				<img src="starting-info.png" /><br />
+				<p>
+					Once a model is selected, some starting information will be
+					provided:
+				</p>
+				<ol>
+					<li><b>MAB model:</b> the MAB model that was selected.</li>
+					<li>
+						<b>ACV count:</b> the number of ACVs that are in the
+						simulation.
+					</li>
+					<li>
+						<b>Ideal distance:</b> the distance which the ACVs will
+						try to maintain between each other.
+					</li>
+					<li>
+						<b>Total iterations:</b> the number of iterations the
+						simulation will run for.
+					</li>
+					<li>
+						<b>Iterations being modified:</b> the iterations where
+						distance sensor readings will be manipulated. Displays
+						the iterations which the modification will occur, the
+						ACV which will be modified, and the multiplier that will
+						be applied to the distance sensor value
+					</li>
+				</ol>
+				<h3>3. Simulation</h3>
+				<img src="acv-table.png" /><br />
+				<p>
+					The simulation is visualized as a table showing the
+					distance, speed, location values of each ACV in the system.
+					Note that the lead ACV does not have a distance value as
+					there are no ACVs ahead of it.
+				</p>
+				<p>The color coding of the table is as follows:</p>
+				<ul>
+					<li>
+						<p style="background-color: yellow; display: inline">
+							Yellow:
+						</p>
+						The ACV's distance sensor has been manipulated. A short
+						description of this is also displayed to the right of
+						the table.
+					</li>
+					<li>
+						<p
+							style="
+								background-color: red;
+								color: white;
+								display: inline;
+							"
+						>
+							Red:
+						</p>
+						A crash has occurred between two ACVs. A short
+						description of this is displayed to the right of the
+						table as well.
+					</li>
+					<li>
+						<p
+							style="
+								background-color: lightgreen;
+								display: inline;
+							"
+						>
+							Green:
+						</p>
+						The MAB model has determined that the reading is faulty
+						and the ACV has decided to ignore the sensor reading.
+						The actual, unmodified distance reading is given in its
+						place.
+					</li>
+				</ul>
+				<h3>4. Final Metrics</h3>
+				<img src="final-stats.png" /><br />
+				<p>
+					Various metrics are shown at the conclusion of the
+					simulation.
+				</p>
+				<p>
+					The table describes the penalty and regret incurred by each
+					ACV, compared with what the baseline of these values would
+					be (no sensor reading filtering applied). Below the table is
+					the total number of crashes, average penalty and total
+					regret for all ACVs, along with their baseline values, and
+					percentage improvement in penalty and regret compared to the
+					baseline.
+				</p>
+				<p>Some notes about penalty and regret:</p>
+				<ul>
+					<li>
+						<b>Penalty:</b> penalty (P) = variation (V) from desired
+						^2 -> P = V^2. This is essentially the distance from the
+						desired distance squared. When vehicles collide, a very
+						large penalty of 1000 is applied to the ACV so long as
+						there was a choice it could've made that would've
+						prevented the crash
+					</li>
+					<li>
+						<b>Regret:</b> regret is calculated by subtracting the
+						baseline penalty from the actual penalty. Essentially,
+						it is the difference between the achieved utlity and
+						what it would've been without any bad sensor filtering
+						applied.
+					</li>
+				</ul>
 				<hr />
 				<br />
 				<h2 id="team">The Team</h2>
