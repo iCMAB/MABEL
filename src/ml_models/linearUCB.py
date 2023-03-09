@@ -5,12 +5,13 @@ from ml_models.MABModel import MABModel
 
 class LinearUCB(MABModel):
     def __init__(self, **kwargs):
+        self.n_arms = kwargs.get('n_arms')
         self.d = kwargs.get('d')
         self.alpha = kwargs.get('alpha')
         
-        self.A = [np.identity(self.d)] * 3
-        self.b = [np.zeros((self.d, 1))] * 3
-        self.theta = [np.zeros((self.d, 1))] * 3
+        self.A = [np.identity(self.d)] * self.n_arms
+        self.b = [np.zeros((self.d, 1))] * self.n_arms
+        self.theta = [np.zeros((self.d, 1))] * self.n_arms
 
     def select_arm(self, **kwargs):
         readings = kwargs.get('readings')

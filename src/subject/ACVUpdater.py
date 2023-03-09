@@ -21,11 +21,28 @@ class ACVUpdater(Observable):
         """Initialize the ACVUpdater class."""
 
         super().__init__()
+
         self.acvs = list()
-        self.iteration = 0
-        self.iterations_to_mod = dict()
-        self.total_crashes = 0
         self.acvs_ignoring_sensor = list()
+        self.iteration = 0
+        self.total_crashes = 0
+
+        self.initialize_acvs()
+
+        # Done after ACV initialization
+        self.iterations_to_mod = self.calculate_mod_iterations()
+
+    def initialize_acvs(self):
+        """Reads the starting data from the CSV file, initializes the ACVs, and starts the update loop."""
+
+        data = pandas.read_csv('data/acv_start.csv')
+
+        # Initialize ACVs
+        for index, row in data.iterrows():
+            self.acvs.append(ACV(index, float(row['start_location']), float(row['start_speed'])))
+
+        if (len(self.acvs) <= 1):
+            raise Exception('Please initialize 2 or more ACVs with unique indexes from the CSV file.')
 
     def calculate_mod_iterations(self) -> dict:
         """
@@ -51,21 +68,6 @@ class ACVUpdater(Observable):
 
         iteration_mod_pair = dict(sorted(iteration_mod_pair.items()))
         return iteration_mod_pair
-
-    def read_data(self):
-        """Reads the starting data from the CSV file, initializes the ACVs, and starts the update loop."""
-
-        data = pandas.read_csv('data/acv_start.csv')
-
-        # Initialize ACVs
-        for index, row in data.iterrows():
-            self.acvs.append(ACV(index, float(row['start_location']), float(row['start_speed'])))
-
-        if (len(self.acvs) <= 1):
-            raise Exception('Please initialize 2 or more ACVs with unique indexes from the CSV file.')
-
-        self.iterations_to_mod = self.calculate_mod_iterations()
-        self.run_update_loop()
 
     def run_update_loop(self):
         """Runs the update loop for the distance sensor."""
