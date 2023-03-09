@@ -24,17 +24,19 @@ def run_simulation():
     """Runs the ACV simulation."""
 
     knowledge = Knowledge()
+    updater = ACVUpdater()
     knowledge.ideal_distance = subject.IDEAL_DISTANCE
+    
     model = select_model()
 
     d = 1
     alpha = 0.1
     epsilon = 0.5
-    n_arms = 3
+    n_arms = len(updater.acvs) - 1
     knowledge.mab_model = model(
         d=d, alpha=alpha, epsilon=epsilon, n_arms=n_arms)
 
-    updater = ACVUpdater()
+   
 
     executer = Executer(updater)
     planner = Planner(executer)
@@ -42,7 +44,7 @@ def run_simulation():
     monitor = Monitor(analyzer)
 
     updater.register(monitor)
-    updater.read_data()
+    updater.run_update_loop()
 
 
 def select_model():

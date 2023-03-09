@@ -7,12 +7,14 @@ from ml_models.MABModel import MABModel
 class EpsilonGreedy(MABModel):
     # theta - penalty calculator
     def __init__(self, **kwargs):
+        self.n_arms = kwargs.get('n_arms')
+
         # Epsilon is the probability with which an arm is selected.
         self.epsilon = kwargs.get('epsilon')
         self.d = kwargs.get('d')
 
         # Intially all arms have the same penalties.
-        self.theta = [np.identity(self.d)] * 3
+        self.theta = [np.identity(self.d)] * self.n_arms
 
     # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):

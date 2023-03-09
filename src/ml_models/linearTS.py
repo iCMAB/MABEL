@@ -4,13 +4,15 @@ from ml_models.MABModel import MABModel
 
 class LinearThompsonSampling(MABModel):
     def __init__(self, **kwargs):
+        self.n_arms = kwargs.get('n_arms')
         self.iteration = 1
         self.d = kwargs.get('d')
+
         # Covariance matrix, initialized as identity matrix
-        self.var = [np.identity(self.d)] * 3
-        self.means = [np.identity(self.d)] * 3
-        self.b = [np.zeros((self.d, 1))] * 3  # Observation vector, initialized as zero vector
-        self.theta = [np.zeros((self.d, 1))] * 3
+        self.var = [np.identity(self.d)] * self.n_arms
+        self.means = [np.identity(self.d)] * self.n_arms
+        self.b = [np.zeros((self.d, 1))] * self.n_arms  # Observation vector, initialized as zero vector
+        self.theta = [np.zeros((self.d, 1))] * self.n_arms
 
     def select_arm(self, **kwargs):
         theta = np.random.normal(self.means, np.sqrt(self.var))
