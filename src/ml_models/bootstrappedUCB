@@ -1,0 +1,31 @@
+import numpy as np
+from ml_models import Bandit
+class BootstrappedUCB:
+    def bootstrapped_ucb(n_arms, n_steps, n_bootstraps):
+        bandit = Bandit(n_arms)
+        penalties = []
+        action_counts = np.zeros(n_arms)
+        for i in range(n_steps):
+            ucbs = []
+            for j in range(n_arms):
+                if action_counts[j] == 0:
+                    ucbs.append(np.inf)
+                else:
+                    bootstrap_means = []
+                    for k in range(n_bootstraps):
+                        bootstrap_sample = np.random.choice(penalties[j], size=len(penalties[j]))
+                        bootstrap_mean = np.mean(bootstrap_sample)
+                        bootstrap_means.append(bootstrap_mean)
+                    bootstrap_means = np.array(bootstrap_means)
+                    bootstrap_mean = np.mean(bootstrap_means)
+                    bootstrap_std = np.std(bootstrap_means)
+                    ucb = bootstrap_mean + np.sqrt(2 * np.log(i+1) / action_counts[j] * np.minimum(0.25, bootstrap_std**2))
+                    ucbs.append(ucb)
+            action = np.argmax(ucbs)
+            penalty = bandit.pull_arm(action)
+            penalties.append(penalty)
+            action_counts[action] += 1
+            bandit.counts[action] += 1
+            bandit.means[action] += (penalty - bandit.means[action]) / bandit.counts[action]
+        return penalties
+
