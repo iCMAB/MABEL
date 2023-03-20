@@ -145,9 +145,11 @@ class Logger:
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
 
-        print(
-         column_aggregate + flags, end='')
-        input()
+        end = '\n' if subject.AUTOMATIC_OUTPUT == True else ''
+        print(column_aggregate + flags, end=end)
+        
+        if (subject.AUTOMATIC_OUTPUT == False):
+            input()
 
     def print_table_header(self):
         """Prints the table header"""
