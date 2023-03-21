@@ -33,10 +33,9 @@ def run_simulation():
     alpha = 0.1
     epsilon = 0.5
     n_arms = len(updater.acvs) - 1
+    ideal_distance = subject.IDEAL_DISTANCE
     knowledge.mab_model = model(
-        d=d, alpha=alpha, epsilon=epsilon, n_arms=n_arms)
-
-   
+        d=d, alpha=alpha, epsilon=epsilon, n_arms=n_arms, ideal_distance=ideal_distance)
 
     executer = Executer(updater)
     planner = Planner(executer)
