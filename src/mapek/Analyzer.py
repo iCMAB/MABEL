@@ -91,8 +91,9 @@ class Analyzer(Component):
         arm = model.select_arm(readings=readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
-        predicted_penalty = np.dot(model.theta[arm], readings[arm])[0]
-        
+
+        predicted_penalty = np.dot(model.theta[arm], abs(knowledge.ideal_distance-readings[arm]))[0]
+
         residual = abs(penalty - predicted_penalty)
         if residual > 5:
             self.bad_sensor = arm
@@ -100,7 +101,7 @@ class Analyzer(Component):
             # New penalty with actual, unmodified distance
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
-        model.update(arm=arm, x=abs(readings[arm]-knowledge.ideal_distance), penalty=penalty)
+        model.update(arm=arm, x=abs(knowledge.ideal_distance-readings[arm]), penalty=penalty)
 
     def calculate_penalty(self, distance, index) -> float:
         """
