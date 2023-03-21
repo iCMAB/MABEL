@@ -15,11 +15,10 @@ class LinearUCB(MABModel):
         self.theta = [np.zeros((self.d, 1))] * self.n_arms
 
     def select_arm(self, **kwargs):
-        readings = kwargs.get('readings')
-        variations = [abs(self.ideal_distance - reading) for reading in readings]
+        variations = kwargs.get('variations')
 
         # Calculate the upper confidence bound for each arm
-        length = len(readings)
+        length = self.n_arms
         ucb = [0] * length
         for i in range(length):
             # theta = np.linalg.inv(self.A[i]).dot(self.b[i])

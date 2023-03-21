@@ -16,8 +16,7 @@ class LinearThompsonSampling(MABModel):
         self.theta = [np.zeros((self.d, 1))] * self.n_arms
 
     def select_arm(self, **kwargs):
-        readings = kwargs.get('readings')
-        variations = [abs(self.ideal_distance - reading) for reading in readings]
+        variations = kwargs.get('variations')
             
         theta = np.random.normal(self.means, np.sqrt(self.var))
 

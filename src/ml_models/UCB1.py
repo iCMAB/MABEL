@@ -17,8 +17,7 @@ class UCB1_Normal_Penalized(MABModel):
         """
         Choose the arm with the highest UCB val based on the current estimates of the mean reward and variance.
         """
-        readings = kwargs.get('readings')
-        variations = [abs(self.ideal_distance - reading) for reading in readings]
+        variations = kwargs.get('variations')
 
         # Try each arm
         if self.total_selections < self.n_arms:
@@ -26,7 +25,7 @@ class UCB1_Normal_Penalized(MABModel):
         else:
             #  Then calculate UCB value for each arm and choose the arm with the smallest penalty
             ucb_values = []
-            for i in range(len(self.theta)):
+            for i in range(self.n_arms):
                 x = np.array(variations[i]).reshape(-1, 1)
                 ucb_values.append(np.dot(self.theta[i].T, x) - np.sqrt(2 * np.log(self.total_selections) / self.num_selections[i]))
             arm = np.argmax(ucb_values)
