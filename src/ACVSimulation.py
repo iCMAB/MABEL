@@ -11,12 +11,14 @@ from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
 from ml_models.EpsilonGreedy import EpsilonGreedy
 from ml_models.UCB1 import UCB1_Normal_Penalized
+from ml_models.bootstrappedUCB import BootstrappedUCB
 
 model_options = [
     ('LinearUCB', LinearUCB),
     ('LinearThompsonSampling', LinearThompsonSampling),
     ('BernoulliEpsilon', EpsilonGreedy),
     ('UCB1', UCB1_Normal_Penalized),
+    ('BootstrappedUCB',BootstrappedUCB)
 ]
 
 
@@ -33,7 +35,8 @@ def run_simulation():
     alpha = 0.1
     epsilon = 0.5
     n_arms = len(updater.acvs) - 1
-    knowledge.mab_model = model(
+    n_bootstrap = 1000
+    knowledge.mab_model = model(n_bootstrap = n_bootstrap,
         d=d, alpha=alpha, epsilon=epsilon, n_arms=n_arms)
 
    
