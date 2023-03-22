@@ -91,9 +91,8 @@ class Analyzer(Component):
         arm = model.select_arm(readings=readings)
 
         penalty = self.calculate_penalty(readings[arm], arm)
-        print(model.theta[arm], readings[arm])
-        predicted_penalty = np.dot(model.theta[arm], readings[arm])[0]
         
+        predicted_penalty = np.dot(model.theta[arm], readings[arm])
         residual = abs(penalty - predicted_penalty)
         if residual > 5:
             self.bad_sensor = arm
