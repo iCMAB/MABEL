@@ -1,1 +1,1 @@
-# iCMAB Simulation Tool
+# Multi-Armed Bandit EvaLuator (MABEL)
