@@ -56,7 +56,7 @@ class ACVUpdater(Observable):
         mod_percent = subject.PERCENT_MODIFIED
         num_modded = round(num_iterations * mod_percent) # Floors the decimal value for all positive numbers
 
-        mod_iterations = random.sample(range(subject.TRAINING_ITERATIONS, num_iterations), num_modded)
+        mod_iterations = random.sample(range(subject.TRAINING_ITERATIONS + 1, num_iterations), num_modded)
         iteration_mod_pair = {
             iteration:
             (
