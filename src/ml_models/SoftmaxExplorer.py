@@ -10,7 +10,7 @@ class SoftmaxExplorer(MABModel):
         self.n_arms = kwargs.get('n_arms')
         self.d = kwargs.get('d')
         # Epsilon is the probability with which an arm is selected.
-        self.temperature = kwargs.get('temp')
+        self.epsilon = kwargs.get('epsilon')
         self.counts = [np.zeros(self.d)] * self.n_arms
 
         # Intially all arms have the same penalties.
@@ -18,10 +18,10 @@ class SoftmaxExplorer(MABModel):
 
     # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):
-        readings = kwargs.get('readings')
-        z = np.sum(np.exp(readings / self.temperature))
-        probs = np.exp(readings / self.temperature) / z
-        return np.random.choice(self.n_arms, p=probs)
+        z = np.sum(np.exp([x//self.epsilon for x in self.values]))
+        probs = np.exp([x//self.epsilon for x in self.values]) / z
+        print(probs)
+        return np.random.choice(self.n_arms, probs)
 
     # Updating of values happens using penalty values
     # Method takes as input the index of the arm that was played and the observed penalty,
