@@ -57,15 +57,15 @@ class Analyzer(Component):
         index = 0
         for (index, acv) in enumerate(trailing_acvs):
             sensor_distance = acv.distance
-            predicted_distance = acv.predicted_distance
             actual_distance = knowledge.actual_distances[index]
+            # predicted_distance = acv.predicted_distance
 
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
             actual_speed = knowledge.target_speed + (actual_distance - ideal_distance)
             
             # Predicted speed may be used in the future
-            predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
+            # predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
@@ -157,6 +157,5 @@ class Analyzer(Component):
         # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
         if ((crash_front or crash_back) and (sensor_altered)):
             penalty = 1000 
-            # print("CRASH",index,self.distances[index])
 
         return penalty

@@ -37,8 +37,15 @@ def run_simulation():
     n_arms = len(updater.acvs) - 1
     n_bootstrap = 1000
     ideal_distance = subject.IDEAL_DISTANCE
-    knowledge.mab_model = model(n_bootstrap = n_bootstrap,
-        d=d, alpha=alpha, epsilon=epsilon, n_arms=n_arms, ideal_distance=ideal_distance)
+
+    knowledge.mab_model = model(
+        d = d,
+        n_arms = n_arms, 
+        ideal_distance = ideal_distance,
+        alpha = alpha, 
+        epsilon = epsilon, 
+        n_bootstrap = n_bootstrap,
+    )
 
     executer = Executer(updater)
     planner = Planner(executer)
@@ -47,7 +54,6 @@ def run_simulation():
 
     updater.register(monitor)
     updater.run_update_loop()
-
 
 def select_model():
     """Selects the model to use for the simulation."""
