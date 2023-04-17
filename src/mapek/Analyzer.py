@@ -57,15 +57,15 @@ class Analyzer(Component):
         index = 0
         for (index, acv) in enumerate(trailing_acvs):
             sensor_distance = acv.distance
-            predicted_distance = acv.predicted_distance
             actual_distance = knowledge.actual_distances[index]
+            # predicted_distance = acv.predicted_distance
 
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
             actual_speed = knowledge.target_speed + (actual_distance - ideal_distance)
             
             # Predicted speed may be used in the future
-            predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
+            # predicted_speed = knowledge.target_speed + (predicted_distance - ideal_distance)
 
             # Separate penalties for the potential bad sensor reading and the ground truth
             sensor_penalty = self.calculate_penalty(sensor_distance, index)
@@ -87,20 +87,21 @@ class Analyzer(Component):
 
         trailing_acvs = self.acvs[1:]
         readings = [acv.distance for acv in trailing_acvs]        
-        
-        arm = model.select_arm(readings=readings)
+        variations = [abs(knowledge.ideal_distance - reading) for reading in readings]
+
+        arm = model.select_arm(variations=variations)
 
         penalty = self.calculate_penalty(readings[arm], arm)
-        predicted_penalty = np.dot(model.theta[arm], readings[arm])[0]
-        
+        predicted_penalty = np.dot(model.theta[arm], readings[arm])
         residual = abs(penalty - predicted_penalty)
+        
         if residual > 5:
             self.bad_sensor = arm
 
             # New penalty with actual, unmodified distance
             penalty = self.calculate_penalty(self.distances[arm][1], arm)
 
-        model.update(arm=arm, x=readings[arm], penalty=penalty)
+        model.update(arm=arm, x=variations[arm], penalty=penalty)
 
     def calculate_penalty(self, distance, index) -> float:
         """
@@ -154,7 +155,7 @@ class Analyzer(Component):
         sensor_altered = (self.distances[index][0] != self.distances[index][1])
 
         # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
-        if ((crash_front or crash_back) and (sensor_altered or self.bad_sensor == index)):
+        if ((crash_front or crash_back) and (sensor_altered)):
             penalty = 1000 
 
         return penalty
