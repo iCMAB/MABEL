@@ -1,3 +1,4 @@
+from functools import reduce
 import numpy as np
 import random
 
@@ -14,14 +15,18 @@ class SoftmaxExplorer(MABModel):
         self.counts = [np.zeros(self.d)] * self.n_arms
 
         # Intially all arms have the same penalties.
-        self.values = [np.zeros(self.d)] * self.n_arms
+        self.theta = [np.zeros(self.d)] * self.n_arms
 
     # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):
-        z = np.sum(np.exp([x//self.epsilon for x in self.values]))
-        probs = np.exp([x//self.epsilon for x in self.values]) / z
-        print(probs)
-        return np.random.choice(self.n_arms, probs)
+        z = np.sum(np.exp([x//self.epsilon for x in self.theta]))
+        probs = np.exp([x//self.epsilon for x in self.theta]) / z
+        print("probs are : ")
+        flattenedArr = []
+        for item in probs:
+            for val in item:
+                flattenedArr.append(val)
+        return np.random.choice(self.n_arms, p=flattenedArr)
 
     # Updating of values happens using penalty values
     # Method takes as input the index of the arm that was played and the observed penalty,
@@ -31,6 +36,6 @@ class SoftmaxExplorer(MABModel):
         penalty = kwargs.get('penalty')
         self.counts[arm] += 1
         n = self.counts[arm]
-        value = self.values[arm]
+        value = self.theta[arm]
         new_value = ((n - 1) / n) * value + (1 / n) * penalty
-        self.values[arm] = new_value
+        self.theta[arm] = new_value
