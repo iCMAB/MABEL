@@ -11,12 +11,14 @@ from ml_models.linearUCB import LinearUCB
 from ml_models.linearTS import LinearThompsonSampling
 from ml_models.EpsilonGreedy import EpsilonGreedy
 from ml_models.UCB1 import UCB1_Normal_Penalized
+from ml_models.SoftmaxExplorer import SoftmaxExplorer
 
 model_options = [
     ('LinearUCB', LinearUCB),
     ('LinearThompsonSampling', LinearThompsonSampling),
     ('BernoulliEpsilon', EpsilonGreedy),
     ('UCB1', UCB1_Normal_Penalized),
+    ('SoftmaxExplorer', SoftmaxExplorer),
 ]
 
 
