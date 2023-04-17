@@ -18,13 +18,20 @@ class EpsilonGreedy(MABModel):
 
     # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):
+        variations = kwargs.get('variations')
+
         rand_val = random.uniform(0, 1)
         if rand_val < self.epsilon:
             # Explore: Choose a random arm with probability epsilon
             return np.random.randint(0, len(self.theta))
         else:
             # Exploit: Choose the arm with the highest estimated value
-            return np.argmax(self.theta)
+            theta = [0] * self.n_arms
+            for i in range(self.n_arms):
+                x = np.array(variations[i]).reshape(-1, 1)
+                theta[i] = np.dot(self.theta[i].T, x)
+            
+            return np.argmax(theta)
 
     # Updating of values happens using penalty values
     # Method takes as input the index of the arm that was played and the observed penalty,

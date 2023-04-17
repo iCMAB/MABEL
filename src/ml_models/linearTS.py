@@ -7,6 +7,7 @@ class LinearThompsonSampling(MABModel):
         self.n_arms = kwargs.get('n_arms')
         self.iteration = 1
         self.d = kwargs.get('d')
+        self.ideal_distance = kwargs.get('ideal_distance')
 
         # Covariance matrix, initialized as identity matrix
         self.var = [np.identity(self.d)] * self.n_arms
@@ -15,7 +16,14 @@ class LinearThompsonSampling(MABModel):
         self.theta = [np.zeros((self.d, 1))] * self.n_arms
 
     def select_arm(self, **kwargs):
+        variations = kwargs.get('variations')
+            
         theta = np.random.normal(self.means, np.sqrt(self.var))
+
+        for i in range(self.n_arms):
+            x = np.array(variations[i]).reshape(-1, 1)
+            theta[i] = np.abs(np.dot(theta[i], x.T))
+
         return np.argmax(theta)
 
     def update(self, **kwargs):    
