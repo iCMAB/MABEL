@@ -40,7 +40,9 @@ layout = go.Layout(
 fig = go.Figure(data=[trace], layout=layout)
 
 app.layout = html.Div([
+    
     dcc.Graph(id='graph', figure=fig),
+    html.Div(id='iteration', style={'font-size': '15px'}),
     dcc.Interval(
         id='data-update',
         interval=time_interval,  # in milliseconds
@@ -59,14 +61,14 @@ app.layout = html.Div([
         marks=None,
         tooltip={"placement": "bottom", "always_visible": False}
     ),
-    html.Div(id='iteration', style={'margin-top': 20}),
-    html.Button('Play', id='play')
-])    
+    
+    html.Button('Play', id='play', style={'width': '20%', 'margin-top': '5px'})
+], style={'textAlign': 'center'})    
 
 @app.callback(
     Output('graph', 'figure', allow_duplicate=True), 
-    Output('iteration', 'children'),
     Output('year-slider', 'value'),
+    Output('iteration', 'children'),
     Input('data-update', 'n_intervals'),
     State('year-slider', 'value'),
     prevent_initial_call=True
@@ -77,12 +79,13 @@ def update_data(n, value):
 
     fig['data'][0]['x'] = x
 
-    return fig, index, index
+    return fig, index, "Iteration: " + str(index)
+
 
 @app.callback(
     Output('graph', 'figure', allow_duplicate=True), 
     Input('range-update', 'n_intervals'),
-    prevent_initial_call='initial_duplicate'
+    prevent_initial_call=True
 )
 def update_range(n):
     time.sleep(time_interval / 4000)
@@ -92,24 +95,27 @@ def update_range(n):
 
     return fig
 
+
 @app.callback(
     Output('graph', 'figure', allow_duplicate=True), 
     Output('iteration', 'children', allow_duplicate=True),
     Input('year-slider', 'value'),
     State('iteration', 'children'),
-    prevent_initial_call=True
+    prevent_initial_call='initial_duplicate'
 )
 def slider_update(value, iteration):
-    if (iteration == value):
-        return dash.no_update, dash.no_update
+    if (iteration != None):
+        iteration = int(iteration.split(" ")[1])
+        if (iteration == value):
+            return dash.no_update, dash.no_update
 
     index = value
     x = records[index]
     fig['data'][0]['x'] = x
     fig['layout']['xaxis']['range'] = (x[0]-5, x[len(x)-1]+5)
 
-    return fig, index
-        
+    return fig, "Iteration: " + str(index)
+
 
 @app.callback(
     Output("data-update", "disabled"),
@@ -126,6 +132,7 @@ def toggle(n, playing):
         return state, state, text
     else:
         return playing, playing, "Play"
+
 
 def open_browser():
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
