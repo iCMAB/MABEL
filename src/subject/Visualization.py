@@ -7,63 +7,74 @@ from threading import Timer
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-fig = None
 
-records = [[col_idx + row_idx for col_idx in range(5)] for row_idx in range(100)]
-y = [4-i for i in range(5)]
+records = []
 time_interval = 1000
-
-trace = go.Scatter(x=records[0], y=y, mode='markers', marker=dict(size=15, color='LightSkyBlue'), name="acvs")
-
-layout = go.Layout(
-    title='ACV Simulation',
-    xaxis=dict(
-        title='Position', 
-        tickmode = 'linear',
-        dtick = 0.5
-    ),
-    yaxis=dict(
-        title='ACVs',
-        type='category',
-        categoryorder='total descending',
-        tickmode='array',
-        tickvals=[0, 1, 2, 3, 4],
-        ticktext=['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3', 'ACV 4']
-    ),
-    height=500,
-    transition={
-        'duration': time_interval / 2.5,
-        'easing': 'cubic-in-out'
-    }
-)
-
-fig = go.Figure(data=[trace], layout=layout)
-
-app.layout = html.Div([
+fig = None
     
-    dcc.Graph(id='graph', figure=fig),
-    html.Div(id='iteration', style={'font-size': '15px'}),
-    dcc.Interval(
-        id='data-update',
-        interval=time_interval,  # in milliseconds
-        disabled=True
-    ),
-    dcc.Interval(
-        id='range-update',
-        interval=time_interval,  # in milliseconds
-        disabled=True
-    ),
-    dcc.Slider(
-        id="year-slider",
-        min=0,
-        max=100,
-        value=0,
-        marks=None,
-        tooltip={"placement": "bottom", "always_visible": False}
-    ),
-    
-    html.Button('Play', id='play', style={'width': '20%', 'margin-top': '5px'})
-], style={'textAlign': 'center'})    
+def start_visualizer(acv_vals: list):
+    create_graph(acv_vals)
+
+    Timer(1, open_browser).start()
+    app.run_server(debug=True)
+
+def create_graph(acv_vals: list):
+    global records, time_interval, fig, app
+
+    records = acv_vals
+    y = [4-i for i in range(5)]
+
+    trace = go.Scatter(x=records[0], y=y, mode='markers', marker=dict(size=15, color='LightSkyBlue'), name="acvs")
+
+    layout = go.Layout(
+        title='ACV Simulation',
+        xaxis=dict(
+            title='Position', 
+            tickmode = 'linear',
+            dtick = 1
+        ),
+        yaxis=dict(
+            title='ACVs',
+            type='category',
+            categoryorder='total descending',
+            tickmode='array',
+            tickvals=[0, 1, 2, 3, 4],
+            ticktext=['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3', 'ACV 4']
+        ),
+        height=500,
+        transition={
+            'duration': time_interval / 3,
+            'easing': 'cubic-in-out'
+        }
+    )
+
+    fig = go.Figure(data=[trace], layout=layout)
+
+    app.layout = html.Div([
+        
+        dcc.Graph(id='graph', figure=fig),
+        html.Div(id='iteration', style={'font-size': '15px'}),
+        dcc.Interval(
+            id='data-update',
+            interval=time_interval,  # in milliseconds
+            disabled=True
+        ),
+        dcc.Interval(
+            id='range-update',
+            interval=time_interval,  # in milliseconds
+            disabled=True
+        ),
+        dcc.Slider(
+            id="year-slider",
+            min=0,
+            max=100,
+            value=0,
+            marks=None,
+            tooltip={"placement": "bottom", "always_visible": False}
+        ),
+        
+        html.Button('Play', id='play', style={'width': '20%', 'margin-top': '5px'})
+    ], style={'textAlign': 'center'})    
 
 @app.callback(
     Output('graph', 'figure', allow_duplicate=True), 
@@ -88,7 +99,7 @@ def update_data(n, value):
     prevent_initial_call=True
 )
 def update_range(n):
-    time.sleep(time_interval / 4000)
+    time.sleep(time_interval / 3000)
     x = np.copy(fig['data'][0]['x'])
     
     fig['layout']['xaxis']['range'] = (x[0]-5, x[len(x)-1]+5)
@@ -139,5 +150,5 @@ def open_browser():
         webbrowser.open_new('http://127.0.0.1:8050/')
 
 if __name__ == '__main__':
-    Timer(1, open_browser).start()
-    app.run_server(debug=True)
+    acv_vals = [[col_idx + row_idx for col_idx in range(5)] for row_idx in range(100)]
+    start_visualizer(acv_vals)
