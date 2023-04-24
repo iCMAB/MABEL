@@ -11,18 +11,25 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 records = []
 time_interval = 1000
 fig = None
+range_padding = 10
+tick_interval = 5
     
 def start_visualizer(acv_vals: list):
+    # for val in acv_vals:
+    #     print(val)
+
     create_graph(acv_vals)
 
     Timer(1, open_browser).start()
-    app.run_server(debug=True)
+    app.run_server()
+    
 
 def create_graph(acv_vals: list):
     global records, time_interval, fig, app
 
     records = acv_vals
-    y = [4-i for i in range(5)]
+    acv_count = len(records[0])
+    y = [(acv_count - 1) - i for i in range(acv_count)]
 
     trace = go.Scatter(x=records[0], y=y, mode='markers', marker=dict(size=15, color='LightSkyBlue'), name="acvs")
 
@@ -31,15 +38,15 @@ def create_graph(acv_vals: list):
         xaxis=dict(
             title='Position', 
             tickmode = 'linear',
-            dtick = 1
+            dtick = tick_interval
         ),
         yaxis=dict(
             title='ACVs',
             type='category',
             categoryorder='total descending',
             tickmode='array',
-            tickvals=[0, 1, 2, 3, 4],
-            ticktext=['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3', 'ACV 4']
+            tickvals=y,
+            ticktext=['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3']
         ),
         height=500,
         transition={
@@ -89,6 +96,7 @@ def update_data(n, value):
     x = records[index]
 
     fig['data'][0]['x'] = x
+    fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
 
     return fig, index, "Iteration: " + str(index)
 
@@ -102,7 +110,7 @@ def update_range(n):
     time.sleep(time_interval / 3000)
     x = np.copy(fig['data'][0]['x'])
     
-    fig['layout']['xaxis']['range'] = (x[0]-5, x[len(x)-1]+5)
+    fig['layout']['xaxis']['range'] = pad_range(x)
 
     return fig
 
@@ -123,7 +131,8 @@ def slider_update(value, iteration):
     index = value
     x = records[index]
     fig['data'][0]['x'] = x
-    fig['layout']['xaxis']['range'] = (x[0]-5, x[len(x)-1]+5)
+    fig['layout']['xaxis']['range'] = pad_range(x)
+    fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
 
     return fig, "Iteration: " + str(index)
 
@@ -144,6 +153,12 @@ def toggle(n, playing):
     else:
         return playing, playing, "Play"
 
+
+def pad_range(records: list):
+    minimum = min(records)
+    maximum = max(records)
+
+    return (minimum - range_padding, maximum + range_padding)
 
 def open_browser():
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
