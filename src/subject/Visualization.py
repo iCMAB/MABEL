@@ -1,37 +1,49 @@
 from dash import dash, dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
+from threading import Timer
+
 import numpy as np
 import os, webbrowser, time
-from threading import Timer
+
+import random
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-records = []
+locations = []
+modifications = []
+crashes = []
+
 time_interval = 1000
 fig = None
 range_padding = 10
 tick_interval = 5
+
+normal_colors = ['lightSkyBlue']
+mod_color = 'yellow'
+crash_color = 'red'
     
-def start_visualizer(acv_vals: list):
-    # for val in acv_vals:
-    #     print(val)
+def start_visualizer(loc_list: list, mod_dict: dict, crash_list: list):
+    global locations, modifications, crashes
 
-    create_graph(acv_vals)
+    locations = loc_list
+    modifications = mod_dict
+    crashes = crash_list
 
+    create_graph()
     Timer(1, open_browser).start()
     app.run_server()
     
 
-def create_graph(acv_vals: list):
-    global records, time_interval, fig, app
-
-    records = acv_vals
-    acv_count = len(records[0])
+def create_graph():
+    global app, locations, time_interval, fig, normal_colors
+    
+    acv_count = len(locations[0])
+    normal_colors *= acv_count
     y = [(acv_count - 1) - i for i in range(acv_count)]
 
-    trace = go.Scatter(x=records[0], y=y, mode='markers', marker=dict(size=15, color='LightSkyBlue'), name="acvs")
+    trace = go.Scatter(x=locations[0], y=y, mode='markers', marker=dict(size=15, color='LightSkyBlue'), name="acvs")
 
     layout = go.Layout(
         title='ACV Simulation',
@@ -46,7 +58,7 @@ def create_graph(acv_vals: list):
             categoryorder='total descending',
             tickmode='array',
             tickvals=y,
-            ticktext=['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3']
+            ticktext=['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'],
         ),
         height=500,
         transition={
@@ -93,10 +105,30 @@ def create_graph(acv_vals: list):
 )
 def update_data(n, value):
     index = value + 1
-    x = records[index]
+
+    if (index >= len(locations)):
+        return dash.no_update, dash.no_update, dash.no_update
+
+    x = locations[index]
 
     fig['data'][0]['x'] = x
     fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
+
+    colors = normal_colors.copy()
+    
+    # Dist Modifications
+    if (index in modifications):
+        change_index = modifications[index][0]
+        colors[change_index] = mod_color
+
+    # Crashes
+    crash = [c for c in crashes if c[0] == index]
+    if (crash != []):
+        change_indices = crash[0][1][0]
+        colors[change_indices[0]] = crash_color
+        colors[change_indices[1]] = crash_color
+
+    fig['data'][0]['marker']['color'] = colors
 
     return fig, index, "Iteration: " + str(index)
 
@@ -129,7 +161,7 @@ def slider_update(value, iteration):
             return dash.no_update, dash.no_update
 
     index = value
-    x = records[index]
+    x = locations[index]
     fig['data'][0]['x'] = x
     fig['layout']['xaxis']['range'] = pad_range(x)
     fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
@@ -146,10 +178,10 @@ def slider_update(value, iteration):
 )
 def toggle(n, playing):
     if n:
-        state = not playing
-        text = "Play" if state else "Pause" 
+        paused = not playing
+        text = "Play" if paused else "Pause" 
 
-        return state, state, text
+        return paused, paused, text
     else:
         return playing, playing, "Play"
 

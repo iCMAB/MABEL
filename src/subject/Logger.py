@@ -46,6 +46,7 @@ class Logger:
         self.acvs_ignoring_sensor = list()
 
         self.position_records = list()
+        self.crash_records = list()
 
     def get_row_template(self) -> str:
         """
@@ -99,6 +100,8 @@ class Logger:
 
             separator = " : " if flags != "" else ""
             flags += separator + "CRASH " + "".join(["(ACV" + str(crash[0]) + ", ACV" + str(crash[1]) + ")" for crash in crash_list]) 
+
+            self.crash_records.append((iteration, crash_list))
 
         if (flags != ""):
             flags = " <-- " + flags 
@@ -232,9 +235,16 @@ class Logger:
         print("• Improvement in avg penalty:\t" + str(penalty_improvement) + "%")
         print("• Improvement in total regret:\t" + str(regret_improvement) + "%")
 
-        print()
+        print("\n=====================================\n")
 
         self.start_visualization()
 
     def start_visualization(self):
-        start_visualizer(self.position_records)
+        print("Would you like to run the visualization? [y/n] ", end="")
+        response = input().lower()
+        if (response == 'y'):
+            print("Starting visualization...\n")
+            start_visualizer(self.position_records, self.iterations_to_mod, self.crash_records)
+        else:
+            print("Exiting...\n")
+            exit()
