@@ -10,6 +10,7 @@ class SoftmaxExplorer(MABModel):
     def __init__(self, **kwargs):
         self.n_arms = kwargs.get('n_arms')
         self.d = kwargs.get('d')
+
         # Epsilon is the probability with which an arm is selected.
         self.epsilon = kwargs.get('epsilon')
         self.counts = [np.zeros(self.d)] * self.n_arms
@@ -19,13 +20,16 @@ class SoftmaxExplorer(MABModel):
 
     # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):
-        z = np.sum(np.exp([x//self.epsilon for x in self.theta]))
-        probs = np.exp([x//self.epsilon for x in self.theta]) / z
-        print("probs are : ")
+        variations = kwargs.get('variations')
+
+        z = np.sum(np.exp([np.dot(x, variations[i]) // self.epsilon for i, x in enumerate(self.theta)]))
+        probs = np.exp([np.dot(x, variations[i]) // self.epsilon for i, x in enumerate(self.theta)]) / z
         flattenedArr = []
+
         for item in probs:
             for val in item:
                 flattenedArr.append(val)
+            
         return np.random.choice(self.n_arms, p=flattenedArr)
 
     # Updating of values happens using penalty values
@@ -34,6 +38,7 @@ class SoftmaxExplorer(MABModel):
     def update(self, **kwargs):
         arm = kwargs.get('arm')
         penalty = kwargs.get('penalty')
+
         self.counts[arm] += 1
         n = self.counts[arm]
         value = self.theta[arm]
