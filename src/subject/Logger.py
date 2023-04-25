@@ -244,7 +244,7 @@ class Logger:
         response = input().lower()
         if (response == 'y'):
             print("Starting visualization...\n")
-            start_visualizer(self.position_records, self.iterations_to_mod, self.crash_records)
+            start_visualizer(self.position_records, self.iterations_to_mod, self.crash_records, self.model_name)
         else:
             print("Exiting...\n")
             exit()

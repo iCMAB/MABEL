@@ -23,30 +23,44 @@ tick_interval = 5
 normal_colors = ['lightSkyBlue']
 mod_color = 'yellow'
 crash_color = 'red'
+marker_stroke = 3
     
-def start_visualizer(loc_list: list, mod_dict: dict, crash_list: list):
+def start_visualizer(loc_list: list, mod_dict: dict, crash_list: list, model_name: str):
     global locations, modifications, crashes
 
     locations = loc_list
     modifications = mod_dict
     crashes = crash_list
 
-    create_graph()
+    create_graph(model_name)
     Timer(1, open_browser).start()
     app.run_server()
     
 
-def create_graph():
+def create_graph(model_name: str):
     global app, locations, time_interval, fig, normal_colors
     
     acv_count = len(locations[0])
     normal_colors *= acv_count
     y = [(acv_count - 1) - i for i in range(acv_count)]
 
-    trace = go.Scatter(x=locations[0], y=y, mode='markers', marker=dict(size=15, color='LightSkyBlue'), name="acvs")
+    trace = go.Scatter(
+        name="acvs",
+        x=locations[0], 
+        y=y, mode='markers', 
+        marker=dict(
+            size=20, 
+            color='lightSkyBlue',
+            symbol="arrow-right",
+            line=dict(
+                width=0,
+                color=crash_color
+            )
+        ) 
+    )
 
     layout = go.Layout(
-        title='ACV Simulation',
+        title='ACV Simulation - ' + model_name,
         xaxis=dict(
             title='Position', 
             tickmode = 'linear',
@@ -92,7 +106,9 @@ def create_graph():
             tooltip={"placement": "bottom", "always_visible": False}
         ),
         
-        html.Button('Play', id='play', style={'width': '20%', 'margin-top': '5px'})
+        html.Button('<<', id='backward', style={'width': '5%', 'margin-top': '5px'}),
+        html.Button('Play', id='play', style={'width': '20%', 'margin-top': '5px'}),
+        html.Button('>>', id='forward', style={'width': '5%', 'margin-top': '5px'}),
     ], style={'textAlign': 'center'})    
 
 @app.callback(
@@ -103,32 +119,13 @@ def create_graph():
     State('year-slider', 'value'),
     prevent_initial_call=True
 )
-def update_data(n, value):
+def new_iteration_data_update(n, value):
     index = value + 1
 
     if (index >= len(locations)):
         return dash.no_update, dash.no_update, dash.no_update
 
-    x = locations[index]
-
-    fig['data'][0]['x'] = x
-    fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
-
-    colors = normal_colors.copy()
-    
-    # Dist Modifications
-    if (index in modifications):
-        change_index = modifications[index][0]
-        colors[change_index] = mod_color
-
-    # Crashes
-    crash = [c for c in crashes if c[0] == index]
-    if (crash != []):
-        change_indices = crash[0][1][0]
-        colors[change_indices[0]] = crash_color
-        colors[change_indices[1]] = crash_color
-
-    fig['data'][0]['marker']['color'] = colors
+    new_iteration_data_update(index)
 
     return fig, index, "Iteration: " + str(index)
 
@@ -136,13 +133,16 @@ def update_data(n, value):
 @app.callback(
     Output('graph', 'figure', allow_duplicate=True), 
     Input('range-update', 'n_intervals'),
-    prevent_initial_call=True
+    Input('year-slider', 'value'),
+    prevent_initial_call='initial_duplicate'
 )
-def update_range(n):
+def update_range(n, value):
     time.sleep(time_interval / 3000)
     x = np.copy(fig['data'][0]['x'])
-    
-    fig['layout']['xaxis']['range'] = pad_range(x)
+
+    range = (min(x) - range_padding, max(x) + range_padding)
+
+    fig['layout']['xaxis']['range'] = range
 
     return fig
 
@@ -161,10 +161,7 @@ def slider_update(value, iteration):
             return dash.no_update, dash.no_update
 
     index = value
-    x = locations[index]
-    fig['data'][0]['x'] = x
-    fig['layout']['xaxis']['range'] = pad_range(x)
-    fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
+    new_iteration_data_update(index)
 
     return fig, "Iteration: " + str(index)
 
@@ -175,22 +172,63 @@ def slider_update(value, iteration):
     Output("play", "children"),
     Input("play", "n_clicks"),
     State("data-update", "disabled"),
+    prevent_initial_call=True
 )
-def toggle(n, playing):
+def toggle_play(n, playing):
     if n:
         paused = not playing
         text = "Play" if paused else "Pause" 
 
         return paused, paused, text
     else:
-        return playing, playing, "Play"
+        return dash.no_update, dash.no_update, dash.no_update
 
+@app.callback(
+    Output('year-slider', 'value', allow_duplicate=True),
+    Input("forward", "n_clicks"),
+    State('year-slider', 'value'),
+    prevent_initial_call=True
+)
+def forward(n, value):
+    if (n):
+        return value + 1
+    else:
+        return dash.no_update
 
-def pad_range(records: list):
-    minimum = min(records)
-    maximum = max(records)
+@app.callback(
+    Output('year-slider', 'value', allow_duplicate=True),
+    Input("backward", "n_clicks"),
+    State('year-slider', 'value'),
+    prevent_initial_call=True
+)
+def backward(n, value):
+    if (n):
+        return value - 1
+    else:
+        return dash.no_update
 
-    return (minimum - range_padding, maximum + range_padding)
+def new_iteration_data_update(index: int):
+    x = locations[index]
+    fig['data'][0]['x'] = x
+    fig.update_yaxes(categoryorder='array', categoryarray= ['ACV 0', 'ACV 1', 'ACV 2', 'ACV 3'])
+
+    colors = normal_colors.copy()
+    line_widths = [0] * len(x)
+    
+    # Dist Modifications
+    if (index in modifications):
+        change_index = modifications[index][0]
+        colors[change_index] = mod_color
+
+    # Crashes
+    crash = [c for c in crashes if c[0] == index]
+    if (crash != []):
+        change_indices = crash[0][1][0]
+        line_widths[change_indices[0]] = marker_stroke
+        line_widths[change_indices[1]] = marker_stroke
+
+    fig['data'][0]['marker']['color'] = colors
+    fig['data'][0]['marker']['line']['width'] = line_widths
 
 def open_browser():
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
