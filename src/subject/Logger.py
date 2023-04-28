@@ -255,7 +255,6 @@ class Logger:
 
         if (response == 'y'):
             print("Starting visualization...\n")
-            print(self.ignore_records)
             start_visualizer(
                 self.position_records, 
                 self.speed_records,

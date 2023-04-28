@@ -9,7 +9,7 @@ import os, webbrowser, time
 import random
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, update_title='Loading...')
 
 locations = []
 speeds = []
@@ -20,7 +20,7 @@ crashes = []
 
 time_interval = 1000
 fig = None
-range_padding = 10
+range_padding = 15
 tick_interval = 5
 
 normal_colors = ['lightSkyBlue']
@@ -57,7 +57,7 @@ def create_graph(model_name: str):
         y=y, mode='markers', 
         customdata=[[speeds[0][i], distances[0][i], "Unmodified", ""] for i in range(acv_count)],
         marker=dict(
-            size=20, 
+            size=25, 
             color='lightSkyBlue',
             symbol="arrow-right",
             line=dict(
@@ -76,7 +76,10 @@ def create_graph(model_name: str):
     )
 
     layout = go.Layout(
-        title='MABEL Simulation - ' + model_name,
+        title=dict(
+            text='MABEL Simulation - ' + model_name,
+            font=dict(size=20)
+        ),
         xaxis=dict(
             title='Position', 
             tickmode = 'linear',
@@ -99,7 +102,7 @@ def create_graph(model_name: str):
     fig = go.Figure(data=[trace], layout=layout)
 
     app.layout = html.Div([
-        dcc.Graph(id='graph', figure=fig),
+        dcc.Graph(id='graph', figure=fig, style={'height': '70vh'}),
         html.Div(id='iteration', style={'font-size': '15px'}),
         dcc.Interval(
             id='data-update',
@@ -123,7 +126,7 @@ def create_graph(model_name: str):
         html.Button('Play', id='play', style={'width': '20%', 'margin-top': '5px'}),
         html.Button('>>', id='forward', style={'width': '5%', 'margin-top': '5px'}),
         html.Br(),
-        html.Button('Skip to Next Modification', id='skip', style={'width': '15%', 'margin-top': '25px'}),
+        html.Button('Skip to Next Modification', id='skip', style={'width': '15%', 'margin-top': '25px', 'text-align': 'center'}),
     ], style={'textAlign': 'center'})    
 
 @app.callback(
