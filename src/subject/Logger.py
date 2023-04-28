@@ -46,7 +46,10 @@ class Logger:
         self.acvs_ignoring_sensor = list()
 
         self.position_records = list()
+        self.speed_records = list()
+        self.distance_records = list()
         self.crash_records = list()
+        self.ignore_records = list()
 
     def get_row_template(self) -> str:
         """
@@ -140,6 +143,12 @@ class Logger:
         distances_copy = distances.copy()
 
         self.position_records.append(locations.copy())
+        self.speed_records.append(speeds.copy())
+        self.ignore_records.append(self.acvs_ignoring_sensor.copy())
+
+        dist_record = distances.copy()
+        dist_record[0] = "N/A"
+        self.distance_records.append(distances.copy())
 
         # Get flags before conputing the column aggregate so that cell highlighting can be applied
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
@@ -240,11 +249,21 @@ class Logger:
         self.start_visualization()
 
     def start_visualization(self):
-        print("Would you like to run the visualization? [y/n] ", end="")
-        response = input().lower()
+        response = ''
+        while (response != 'y' and response != 'n'):
+            response = input("Would you like to run the visualization? [y/n] ").lower()
+
         if (response == 'y'):
             print("Starting visualization...\n")
-            start_visualizer(self.position_records, self.iterations_to_mod, self.crash_records, self.model_name)
+            print(self.ignore_records)
+            start_visualizer(
+                self.position_records, 
+                self.speed_records,
+                self.distance_records,
+                self.ignore_records,
+                self.iterations_to_mod, 
+                self.crash_records, 
+                self.model_name)
         else:
             print("Exiting...\n")
             exit()
