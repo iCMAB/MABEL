@@ -53,7 +53,7 @@
 				margin: 0;
 				padding: 1em;
 
-				@media screen and (max-width: 700px) {
+				@media screen and (min-device-width: 320px) and (max-device-width: 480px) {
 					width: 100px;
 				}
 			}
@@ -63,7 +63,7 @@
 				margin: auto;
 				width: 130px;
 
-				@media screen and (max-width: 700px) {
+				@media screen and (min-device-width: 320px) and (max-device-width: 480px) {
 					width: 100px;
 				}
 			}
@@ -87,7 +87,7 @@
 				line-height: 18px;
 				font-weight: bold;
 
-				@media screen and (max-width: 700px) {
+				@media screen and (min-device-width: 320px) and (max-device-width: 480px) {
 					font-size: 12px;
 					line-height: 16px;
 				}
@@ -111,7 +111,7 @@
 			ul.output-subsections li a {
 				padding: 4px 16px;
 
-				@media screen and (max-width: 700px) {
+				@media screen and (min-device-width: 320px) and (max-device-width: 480px) {
 					padding: 2px 8px;
 				}
 			}
@@ -122,7 +122,7 @@
 				padding: 8px 16px;
 				text-decoration: none;
 
-				@media screen and (max-width: 700px) {
+				@media screen and (min-device-width: 320px) and (max-device-width: 480px) {
 					padding: 4px 8px;
 				}
 			}
@@ -175,7 +175,7 @@
 			</header>
 			<div class="main-container">
 				<aside class="left">
-					<img src="rit.png" />
+					<img src="images/rit.png" alt="RIT logo" />
 					<p class="subtitle">Department of Software Engineering</p>
 					<hr />
 					<ul class="sidebar">
@@ -283,13 +283,19 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 						discrete sections:
 					</p>
 					<h3 id="1-model-selection">1. Model Selection</h3>
-					<img src="select-model.png" /><br />
+					<img
+						src="images/select-model.png"
+						alt="A screen prompting the user to select a multi-armed bandit model. 1 corresponds to LinearUCB, 2 corresponds to LinearTS, 3 corresponds to BernoulliEpsilon, and 4 corresponds to UCB1"
+					/><br />
 					<p>
 						The MABEL interface will prompt you to select from a
 						list of MAB models to test.
 					</p>
 					<h3 id="2-starting-info">2. Starting Information</h3>
-					<img src="starting-info.png" /><br />
+					<img
+						src="images/starting-info.png"
+						alt="Starting info about the simulation. Multi-Armed bandit model: LinearUCB, ACV count: 4, Ideal distance: 5, Total iterations: 50, Iterations being modified: iteration 1, ACV 2 modified by -1.66x, iteration 6, ACV 3 modified by -2.62x, iteration 8, ACV 2 modified by -3.84x, iteration 20, ACV3 modified by 0.33x, iteration 31, ACV 3 modified by 4.96x"
+					/><br />
 					<p>
 						Once a model is selected, some starting information will
 						be provided:
@@ -321,7 +327,8 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 					</ol>
 					<h3 id="3-simulation">3. Simulation</h3>
 					<img
-						src="acv-table.png"
+						src="images/acv-table.png"
+						alt="The table showing the distance, speed, and location for each ACV at each iteration, along with color coding for each iteration modification and MAB prediction"
 						style="width: 100%; max-width: 900px"
 					/><br />
 					<p>
@@ -376,7 +383,8 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 					</ul>
 					<h3 id="4-metrics">4. Metrics</h3>
 					<img
-						src="final-stats.png"
+						src="images/final-stats.png"
+						alt="Metrics for the simulation. Total crashes: 1, Average penalty: 685.68, Baseline penalty: 771.31, Total regret: 1479.77,  Baseline regret: 1822.32, Improvement in average penalty: 11.10%, Improvement in average regret: 18.80%"
 						style="width: 100%; max-width: 500px"
 					/><br />
 					<p>
@@ -415,7 +423,11 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 						After displaying metrics, MABEL will ask if you'd like
 						to run the visualization.
 					</p>
-					<img src="run-vis.png" style="width: 350px" />
+					<img
+						src="images/run-vis.png"
+						style="width: 350px"
+						alt="A prompt in the program asking 'Would you like to run the visualization? [y/n]'"
+					/>
 					<p>
 						This is a graphical visualization of the ACVs at each
 						iteration made using Plotly Dash. Opting in will start
@@ -428,8 +440,9 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 						visualization.
 					</p>
 					<img
-						src="visualization.png"
+						src="images/visualization.png"
 						style="width: 100%; max-width: 1200px"
+						alt="MABEL's visualization of the simulation"
 					/>
 					<p>
 						Each ACV's position is represented as a triangle, and
@@ -519,12 +532,15 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 						</li>
 					</ul>
 					<p>
-						Hovering over any ACV marker will display more
-						information about that vehicle, including its position,
-						speed, distance reading, and whether its sensor was
-						manipulated or not.
+						Hovering over any ACV marker displays a tooltip showing
+						more information about that vehicle, including its
+						position, speed, distance reading, and whether its
+						sensor was manipulated or not.
 					</p>
-					<img src="acv-hover.png" />
+					<img
+						src="images/acv-hover.png"
+						alt="The tooltip shown when hoving over an ACV marker, including position, speed, distance reading, and modification status"
+					/>
 					<p>
 						Using this visualization tool, you can get a clear
 						picture of how the ACVs are behaving at any given point
@@ -584,17 +600,19 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 				<table style="border: none !important">
 					<tr>
 						<td style="text-align: right; border: none">
-							<img src="rit.png" width="100px" />
+							<img src="images/rit.png" width="100px" />
 						</td>
 						<td style="border: none">
 							<a
 								href="https://danielkrutz.github.io/AwareLab.html"
-								><img src="aware-lab-logo.png" alt="AWARE Lab"
+								><img
+									src="images/aware-lab-logo.png"
+									alt="AWARE Lab"
 							/></a>
 						</td>
 						<td style="text-align: left; border: none">
 							<img
-								src="NSF.png"
+								src="images/NSF.png"
 								alt="NSF"
 								width="110"
 								height="110"
