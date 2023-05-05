@@ -61,7 +61,7 @@
 			.left img {
 				display: block;
 				margin: auto;
-				width: 160px;
+				width: 130px;
 
 				@media screen and (max-width: 700px) {
 					width: 100px;
@@ -83,10 +83,12 @@
 				background-color: #f36917;
 				color: white;
 				padding: 12px;
+				font-size: 15px;
+				line-height: 18px;
 				font-weight: bold;
 
 				@media screen and (max-width: 700px) {
-					font-size: 13px;
+					font-size: 12px;
 					line-height: 16px;
 				}
 			}
@@ -100,11 +102,29 @@
 				top: 2%;
 			}
 
+			ul.output-subsections {
+				list-style-type: none;
+				font-size: 15px;
+				padding-left: 16px;
+			}
+
+			ul.output-subsections li a {
+				padding: 4px 16px;
+
+				@media screen and (max-width: 700px) {
+					padding: 2px 8px;
+				}
+			}
+
 			li a {
 				display: block;
 				color: #000;
 				padding: 8px 16px;
 				text-decoration: none;
+
+				@media screen and (max-width: 700px) {
+					padding: 4px 8px;
+				}
 			}
 
 			li a.active {
@@ -162,7 +182,26 @@
 						<li><a href="#abstract">Abstract</a></li>
 						<li><a href="#download">Download</a></li>
 						<li><a href="#setup">Setup</a></li>
-						<li><a href="#output">Output</a></li>
+						<li>
+							<a href="#output">Output</a>
+							<ul class="output-subsections">
+								<li>
+									<a href="#1-model-selection"
+										>Model Selection</a
+									>
+								</li>
+								<li>
+									<a href="#2-starting-info"
+										>Starting Information</a
+									>
+								</li>
+								<li><a href="#3-simulation">Simulation</a></li>
+								<li><a href="#4-metrics">Metrics</a></li>
+								<li>
+									<a href="#5-visualization">Visualization</a>
+								</li>
+							</ul>
+						</li>
 						<li><a href="#team">Team</a></li>
 					</ul>
 					<br /><br />
@@ -243,13 +282,13 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 						When running MABEL, output will be broken up into four
 						discrete sections:
 					</p>
-					<h3>1. Model Selection</h3>
+					<h3 id="1-model-selection">1. Model Selection</h3>
 					<img src="select-model.png" /><br />
 					<p>
 						The MABEL interface will prompt you to select from a
 						list of MAB models to test.
 					</p>
-					<h3>2. Starting Information</h3>
+					<h3 id="2-starting-info">2. Starting Information</h3>
 					<img src="starting-info.png" /><br />
 					<p>
 						Once a model is selected, some starting information will
@@ -280,16 +319,16 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 							sensor value
 						</li>
 					</ol>
-					<h3>3. Simulation</h3>
+					<h3 id="3-simulation">3. Simulation</h3>
 					<img
 						src="acv-table.png"
 						style="width: 100%; max-width: 900px"
 					/><br />
 					<p>
-						The simulation is visualized as a table showing the
-						distance, speed, location values of each ACV in the
-						system. Note that the lead ACV does not have a distance
-						value as there are no ACVs ahead of it.
+						The simulation is initially visualized as a table
+						showing the distance, speed, location values of each ACV
+						in the system. Note that the lead ACV does not have a
+						distance value as there are no ACVs ahead of it.
 					</p>
 					<p>The color coding of the table is as follows:</p>
 					<ul>
@@ -335,7 +374,7 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 							given in its place.
 						</li>
 					</ul>
-					<h3>4. Metrics</h3>
+					<h3 id="4-metrics">4. Metrics</h3>
 					<img
 						src="final-stats.png"
 						style="width: 100%; max-width: 500px"
@@ -371,8 +410,126 @@ git clone https://github.com/iCMAB/iCMAB-SimulationTool.git</pre
 							any bad sensor filtering applied.
 						</li>
 					</ul>
-					<h3>5. Visualization</h3>
-					<p></p>
+					<h3 id="5-visualization">5. Visualization</h3>
+					<p>
+						After displaying metrics, MABEL will ask if you'd like
+						to run the visualization.
+					</p>
+					<img src="run-vis.png" style="width: 350px" />
+					<p>
+						This is a graphical visualization of the ACVs at each
+						iteration made using Plotly Dash. Opting in will start
+						the Flask server that runs the visualization, and a new
+						tab will open in Google Chrome. The visualization runs
+						on port 8050 (<a href="http://127.0.0.1:8050/"
+							>http://127.0.0.1:8050/</a
+						>), so if you have another application running on that
+						port, you will need to close it before running the
+						visualization.
+					</p>
+					<img
+						src="visualization.png"
+						style="width: 100%; max-width: 1200px"
+					/>
+					<p>
+						Each ACV's position is represented as a triangle, and
+						the vehicles move left to right. ACVs are staggered
+						vertically for visual clarity - disregard vertical
+						spacing and imagine that each ACV is in a single-file
+						horizontal line.
+					</p>
+					<p>Here is an outline of the controls available:</p>
+					<ul>
+						<li>
+							<b>Slider:</b> A draggable handle to modify which
+							iteration in the simulation is displayed.
+						</li>
+						<li>
+							<b>Play/Pause:</b> Plays or pauses the simulation,
+							running through each iteration sequentially one by
+							one.
+						</li>
+
+						<li>
+							<b>Arrows:</b> Moves the current iteration
+							forward/backward by one.
+						</li>
+						<li>
+							<b>Skip to Next Modificaiton:</b> Skips to the next
+							iteration in which an ACV's sensor is being
+							modified.
+						</li>
+					</ul>
+					<p>
+						The color coding of ACVs is similar to how it is in the
+						table layout. It goes as follows:
+					</p>
+					<ul>
+						<li>
+							<p
+								style="
+									background-color: lightblue;
+									display: inline;
+								"
+							>
+								Blue Fill:
+							</p>
+							The ACV is behaving normally. No sensor manipulation
+							present.
+						</li>
+						<li>
+							<p
+								style="
+									background-color: yellow;
+									display: inline;
+								"
+							>
+								Yellow Fill:
+							</p>
+							The ACV's distance sensor has been manipulated.
+							Hover over the ACV marker to view more info.
+						</li>
+						<li>
+							<p
+								style="
+									background-color: red;
+									color: white;
+									display: inline;
+								"
+							>
+								Red Outline:
+							</p>
+							A crash has occurred between two ACVs. The graph
+							will display which two ACVs were involved in the
+							crash.
+						</li>
+						<li>
+							<p
+								style="
+									background-color: lightgreen;
+									display: inline;
+								"
+							>
+								Green Fill:
+							</p>
+							The MAB model has determined that the reading is
+							faulty and the ACV has decided to ignore the sensor
+							reading. Hover over the ACV marker to view more
+							info.
+						</li>
+					</ul>
+					<p>
+						Hovering over any ACV marker will display more
+						information about that vehicle, including its position,
+						speed, distance reading, and whether its sensor was
+						manipulated or not.
+					</p>
+					<img src="acv-hover.png" />
+					<p>
+						Using this visualization tool, you can get a clear
+						picture of how the ACVs are behaving at any given point
+						in the simulation.
+					</p>
 					<hr />
 					<h2 id="team">The Team</h2>
 					<table>
