@@ -15,9 +15,8 @@ class RootWidget(BoxLayout):
         self.tries = 20
         self.total_reward = 0
         self.target = 200
+        self.probs = [(1, 20), (3, 15), (5, 10), (0, 25), (3, 18)]
         self.rewards = [[],[],[],[],[]]
-
-        
 
         self.update_info()       
 
@@ -46,7 +45,7 @@ class RootWidget(BoxLayout):
         self.update_info()
 
         # Gray out all buttons except with id of restart_button if tries == 0
-        if self.tries == 0:
+        if self.tries == 0 or self.total_reward >= self.target:
             self.disable_buttons()
         
         return reward
@@ -69,15 +68,15 @@ class RootWidget(BoxLayout):
 
         reward = 0
         if option_number == 1:
-            reward = self.get_reward(1, 20)
+            reward = self.get_reward(2, 18)
         elif option_number == 2:
-            reward = self.get_reward(5, 15)
+            reward = self.get_reward(3, 15)
         elif option_number == 3:
-            reward = self.get_reward(10, 12)
+            reward = self.get_reward(5, 10)
         elif option_number == 4:
-            reward = self.get_reward(0, 25)
+            reward = self.get_reward(1, 25)
         elif option_number == 5:
-            reward = self.get_reward(3, 18)
+            reward = self.get_reward(3, 17)
         
         index = option_number - 1
         self.rewards[index].append(reward)
@@ -92,6 +91,7 @@ class RootWidget(BoxLayout):
 
         self.tries = 20
         self.total_reward = 0
+        self.rewards = [[],[],[],[],[]]
         self.enable_buttons()
         self.update_info()
 
