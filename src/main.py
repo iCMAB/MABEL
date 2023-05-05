@@ -21,7 +21,6 @@ model_options = [
     ('BootstrappedUCB',BootstrappedUCB)
 ]
 
-
 def run_simulation():
     """Runs the ACV simulation."""
 
