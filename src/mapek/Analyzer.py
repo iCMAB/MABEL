@@ -58,7 +58,6 @@ class Analyzer(Component):
         for (index, acv) in enumerate(trailing_acvs):
             sensor_distance = acv.distance
             actual_distance = knowledge.actual_distances[index]
-            # predicted_distance = acv.predicted_distance
 
             # Speed (S) = target speed (T) + (distance (D) - ideal distance (I)) → S = T + (D - I)
             new_speed = knowledge.target_speed + (sensor_distance - ideal_distance)
@@ -92,9 +91,9 @@ class Analyzer(Component):
         arm = model.select_arm(variations=variations)
 
         penalty = self.calculate_penalty(readings[arm], arm)
-        predicted_penalty = np.dot(model.theta[arm], readings[arm])
+        predicted_penalty = model.theta[arm]
         residual = abs(penalty - predicted_penalty)
-        
+
         if residual > 5:
             self.bad_sensor = arm
 
