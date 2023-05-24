@@ -16,16 +16,17 @@ class SoftmaxExplorer(MABModel):
         self.counts = [np.zeros(self.d)] * self.n_arms
 
         # Intially all arms have the same penalties.
-        self.theta = [np.zeros(self.d)] * self.n_arms
+        self.values = [np.ones(self.d)] * self.n_arms
+        self.theta = [np.ones(self.d)] * self.n_arms
 
     # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):
         variations = kwargs.get('variations')
 
-        z = np.sum(np.exp([np.dot(x, variations[i]) // self.epsilon for i, x in enumerate(self.theta)]))
-        probs = np.exp([np.dot(x, variations[i]) // self.epsilon for i, x in enumerate(self.theta)]) / z
-        flattenedArr = []
+        z = np.sum(np.exp([np.dot(x, variations[i]) // self.epsilon for i, x in enumerate(self.values)]))
+        probs = np.exp([np.dot(x, variations[i]) // self.epsilon for i, x in enumerate(self.values)]) / z
 
+        flattenedArr = []
         for item in probs:
             for val in item:
                 flattenedArr.append(val)
@@ -41,6 +42,8 @@ class SoftmaxExplorer(MABModel):
 
         self.counts[arm] += 1
         n = self.counts[arm]
-        value = self.theta[arm]
+        value = self.values[arm]
         new_value = ((n - 1) / n) * value + (1 / n) * penalty
-        self.theta[arm] = new_value
+        self.values[arm] = new_value
+        
+        self.theta = self.values
