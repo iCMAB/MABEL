@@ -1,8 +1,9 @@
 import subject, itertools, colorama
 
 from tabulate import tabulate
-
 from mapek.Knowledge import Knowledge
+from subject.Visualization import start_visualizer
+
 class Logger:
     """
     Used to log a visual representation of the ACV simulation to the console
@@ -43,6 +44,12 @@ class Logger:
 
         self.model_name = knowledge.mab_model.__class__.__name__
         self.acvs_ignoring_sensor = list()
+
+        self.position_records = list()
+        self.speed_records = list()
+        self.distance_records = list()
+        self.crash_records = list()
+        self.ignore_records = list()
 
     def get_row_template(self) -> str:
         """
@@ -97,6 +104,8 @@ class Logger:
             separator = " : " if flags != "" else ""
             flags += separator + "CRASH " + "".join(["(ACV" + str(crash[0]) + ", ACV" + str(crash[1]) + ")" for crash in crash_list]) 
 
+            self.crash_records.append((iteration, crash_list))
+
         if (flags != ""):
             flags = " <-- " + flags 
 
@@ -133,6 +142,14 @@ class Logger:
         distances = [round(acv.distance, 2) for acv in self.acvs]
         distances_copy = distances.copy()
 
+        self.position_records.append(locations.copy())
+        self.speed_records.append(speeds.copy())
+        self.ignore_records.append(self.acvs_ignoring_sensor.copy())
+
+        dist_record = distances.copy()
+        dist_record[0] = "N/A"
+        self.distance_records.append(distances.copy())
+
         # Get flags before conputing the column aggregate so that cell highlighting can be applied
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
 
@@ -144,6 +161,7 @@ class Logger:
         lead_acv_col = [speeds[0], locations[0]]
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
+
 
         end = '\n' if subject.AUTOMATIC_OUTPUT == True else ''
         print(column_aggregate + flags, end=end)
@@ -226,4 +244,25 @@ class Logger:
         print("• Improvement in avg penalty:\t" + str(penalty_improvement) + "%")
         print("• Improvement in total regret:\t" + str(regret_improvement) + "%")
 
-        print()
+        print("\n=====================================\n")
+
+        self.start_visualization()
+
+    def start_visualization(self):
+        response = ''
+        while (response != 'y' and response != 'n'):
+            response = input("Would you like to run the visualization? [y/n] ").lower()
+
+        if (response == 'y'):
+            print("Starting visualization...\n")
+            start_visualizer(
+                self.position_records, 
+                self.speed_records,
+                self.distance_records,
+                self.ignore_records,
+                self.iterations_to_mod, 
+                self.crash_records, 
+                self.model_name)
+        else:
+            print("Exiting...\n")
+            exit()
