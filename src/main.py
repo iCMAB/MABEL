@@ -14,6 +14,8 @@ from ml_models.UCB1 import UCB1_Normal_Penalized
 from ml_models.bootstrappedUCB import BootstrappedUCB
 from ml_models.SoftmaxExplorer import SoftmaxExplorer
 
+from config import get_config 
+
 model_options = [
     ('LinearUCB', LinearUCB),
     ('LinearThompsonSampling', LinearThompsonSampling),
@@ -28,7 +30,6 @@ def run_simulation():
 
     knowledge = Knowledge()
     updater = ACVUpdater()
-    knowledge.ideal_distance = subject.IDEAL_DISTANCE
     
     model = select_model()
 
@@ -37,8 +38,9 @@ def run_simulation():
     epsilon = 0.5
     n_arms = len(updater.acvs) - 1
     n_bootstrap = 1000
-    ideal_distance = subject.IDEAL_DISTANCE
-
+    ideal_distance = get_config('acvs', 'ideal_distance')
+    
+    knowledge.ideal_distance = ideal_distance
     knowledge.mab_model = model(
         d = d,
         n_arms = n_arms, 

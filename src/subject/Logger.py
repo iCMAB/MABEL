@@ -4,6 +4,8 @@ from tabulate import tabulate
 from mapek.Knowledge import Knowledge
 from subject.Visualization import start_visualizer
 
+from config import get_config
+
 class Logger:
     """
     Used to log a visual representation of the ACV simulation to the console
@@ -162,22 +164,25 @@ class Logger:
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
 
-
-        end = '\n' if subject.AUTOMATIC_OUTPUT == True else ''
+        auto_output = get_config('output', 'automatic_output')
+        end = '\n' if auto_output == True else ''
         print(column_aggregate + flags, end=end)
         
-        if (subject.AUTOMATIC_OUTPUT == False):
+        if (auto_output == False):
             input()
 
     def print_table_header(self):
         """Prints the table header"""
 
+        ideal_dist = get_config('acvs', 'ideal_distance')
+        num_iterations = get_config('simulation', 'iterations')
+
         # Print out ideal distance and which iterations will be modified
         print("=====================================\n")
         print("• MAB model: " + self.model_name)
         print("• ACV count: " + str(len(self.acvs)))
-        print("• Ideal distance: " + str(subject.IDEAL_DISTANCE))
-        print("• Total iterations: " + str(subject.ITERATIONS))
+        print("• Ideal distance: " + str(ideal_dist))
+        print("• Total iterations: " + str(num_iterations))
         print("• Iterations Being modified: ", 
             *["\n   > Iter. " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 

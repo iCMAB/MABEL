@@ -5,6 +5,8 @@ from subject.ACV import ACV
 from subject.Logger import Logger
 from mapek.Knowledge import Knowledge
 
+from config import get_config
+
 class ACVUpdater(Observable):
     """
     Represents the distance sensor of an ACV. Serves as the intermediary between the ACVs and the speed adaptation MAPE-K loop
@@ -52,16 +54,20 @@ class ACVUpdater(Observable):
             dict: A dictionary of iterations to modify as keys and the ACV to modify as well as amount to modify them by as the values.
         """
 
-        num_iterations = subject.ITERATIONS
-        mod_percent = subject.PERCENT_MODIFIED
+        num_iterations = get_config('simulation', 'iterations')
+        mod_percent = get_config('simulation', 'percent_modified')
+        training_iters = get_config('simulation', 'training_iterations')
+        mod_range = get_config('simulation', 'mod_range')
+
         num_modded = round(num_iterations * mod_percent) # Floors the decimal value for all positive numbers
 
-        mod_iterations = random.sample(range(subject.TRAINING_ITERATIONS + 1, num_iterations), num_modded)
+
+        mod_iterations = random.sample(range(training_iters + 1, num_iterations), num_modded)
         iteration_mod_pair = {
             iteration:
             (
                 random.randint(1, len(self.acvs) - 1), # ACV index
-                round(random.uniform(subject.MOD_RANGE[0], subject.MOD_RANGE[1]), 2) # Mod amount
+                round(random.uniform(mod_range[0], mod_range[1]), 2) # Mod amount
             )
             for iteration in mod_iterations
         }
@@ -74,7 +80,7 @@ class ACVUpdater(Observable):
 
         logger = Logger(self.acvs, self.iterations_to_mod)
 
-        for i in range(subject.ITERATIONS + 1):
+        for i in range(get_config('simulation', 'iterations') + 1):
             self.iteration = i
 
             # Only update after first iteration so iteration 0 displays the starting values
