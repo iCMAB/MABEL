@@ -33,13 +33,13 @@ def run_simulation():
     
     model = select_model()
 
-    d = 1
-    alpha = 0.1
-    epsilon = 0.5
-    n_arms = len(updater.acvs) - 1
-    n_bootstrap = 1000
-    ideal_distance = get_config('acvs', 'ideal_distance')
-    
+    d = get_config('mab', 'd')
+    alpha = get_config('mab', 'alpha')
+    epsilon = get_config('mab', 'epsilon')
+    n_arms = get_config('acvs', 'num_acvs') - 1
+    n_bootstrap = get_config('mab', 'n_bootstrap')
+    ideal_distance = get_config('acvs', 'ideal_distance') 
+
     knowledge.ideal_distance = ideal_distance
     knowledge.mab_model = model(
         d = d,

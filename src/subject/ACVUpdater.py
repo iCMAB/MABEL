@@ -5,7 +5,7 @@ from subject.ACV import ACV
 from subject.Logger import Logger
 from mapek.Knowledge import Knowledge
 
-from config import get_config
+from config import get_config, write_config
 
 class ACVUpdater(Observable):
     """
@@ -45,6 +45,8 @@ class ACVUpdater(Observable):
 
         if (len(self.acvs) <= 1):
             raise Exception('Please initialize 2 or more ACVs with unique indexes from the CSV file.')
+        
+        write_config('avs', 'num_acvs', len(self.acvs))
 
     def calculate_mod_iterations(self) -> dict:
         """
@@ -66,7 +68,7 @@ class ACVUpdater(Observable):
         iteration_mod_pair = {
             iteration:
             (
-                random.randint(1, len(self.acvs) - 1), # ACV index
+                random.randint(1, get_config('acvs', 'num_acvs') - 1), # ACV index
                 round(random.uniform(mod_range[0], mod_range[1]), 2) # Mod amount
             )
             for iteration in mod_iterations

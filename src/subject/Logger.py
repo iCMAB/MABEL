@@ -36,12 +36,13 @@ class Logger:
         knowledge = Knowledge()
         
         self.acvs = acvs
+        self.num_acvs = get_config('acvs', 'num_acvs')
         self.iterations_to_mod = iterations_to_mod
         self.column_width = 9    # Width of each column
         self.iter_col_width = 4  # Iteration count column width
 
         # 3 columns per ACV (distance, speed, location) minus lead ACV columns
-        self.num_acv_columns = (len(acvs) - 1) * 3
+        self.num_acv_columns = (self.num_acvs - 1) * 3
         self.row_template = self.get_row_template()
 
         self.model_name = knowledge.mab_model.__class__.__name__
@@ -161,7 +162,7 @@ class Logger:
             
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
         lead_acv_col = [speeds[0], locations[0]]
-        trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
+        trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, self.num_acvs)]))
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
 
         auto_output = get_config('output', 'automatic_output')
@@ -180,7 +181,7 @@ class Logger:
         # Print out ideal distance and which iterations will be modified
         print("=====================================\n")
         print("• MAB model: " + self.model_name)
-        print("• ACV count: " + str(len(self.acvs)))
+        print("• ACV count: " + str(self.num_acvs))
         print("• Ideal distance: " + str(ideal_dist))
         print("• Total iterations: " + str(num_iterations))
         print("• Iterations Being modified: ", 
@@ -194,7 +195,7 @@ class Logger:
 
         # Lead ACV column is 19 wide (2 6-wide columns + 1 1-character divider)
         # All other ACV columns are 30 wide (3 5-wide columns + 2 1-character dividers)
-        acv_template = "||".join(['{:>{iter}}', '{:^{lead_acv}}'] + ['{:^{acv}}' for _ in range(len(self.acvs) - 1)])
+        acv_template = "||".join(['{:>{iter}}', '{:^{lead_acv}}'] + ['{:^{acv}}' for _ in range(self.num_acvs - 1)])
         print(acv_template.format(*acv_headers, iter=self.iter_col_width, lead_acv=(self.column_width * 2 + 1), acv=(self.column_width * 3 + 2)))
 
         # Headers for iteration index and alternating speed/location columns
@@ -227,11 +228,12 @@ class Logger:
                 round_two_decimals(acv.baseline_regret)
             ] for acv in self.acvs]
         headers=["ACV Index", "Penalty", "Regret", "Baseline Penalty", "Baseline Regret"]
-        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))
         
+        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))
+
         # Bullet point metrics
-        avg_penalty = round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs))
-        avg_baseline_penalty = round_two_decimals(sum([acv.baseline_penalty for acv in self.acvs]) / len(self.acvs))
+        avg_penalty = round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / self.num_acvs)
+        avg_baseline_penalty = round_two_decimals(sum([acv.baseline_penalty for acv in self.acvs]) / self.num_acvs)
         total_regret = round_two_decimals(sum([acv.total_regret for acv in self.acvs]))
         total_baseline_regret = round_two_decimals(sum([acv.baseline_regret for acv in self.acvs]))
 

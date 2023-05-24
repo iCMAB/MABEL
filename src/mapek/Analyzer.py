@@ -2,7 +2,8 @@ from mapek.Component import Component
 from mapek.Knowledge import Knowledge
 from mapek.Planner import Planner
 from copy import deepcopy
-import numpy as np
+
+from config import get_config
 
 class Analyzer(Component):
     """
@@ -94,7 +95,7 @@ class Analyzer(Component):
         predicted_penalty = model.theta[arm]
         residual = abs(penalty - predicted_penalty)
 
-        if residual > 5:
+        if residual > get_config('mab', 'residual_threshold'):
             self.bad_sensor = arm
 
             # New penalty with actual, unmodified distance
@@ -155,6 +156,6 @@ class Analyzer(Component):
 
         # A very large penalty is incurred to the ACV with the altered sensor if it crashes into another ACV 
         if ((crash_front or crash_back) and (sensor_altered)):
-            penalty = 1000 
+            penalty = get_config('mab', 'crash_penalty') 
 
         return penalty
