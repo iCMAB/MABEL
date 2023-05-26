@@ -6,7 +6,6 @@ from ml_models.MABModel import MABModel
 
 
 class SoftmaxExplorer(MABModel):
-    # theta - penalty calculator
     def __init__(self, **kwargs):
         self.n_arms = kwargs.get('n_arms')
         self.d = kwargs.get('d')
@@ -17,9 +16,8 @@ class SoftmaxExplorer(MABModel):
 
         # Intially all arms have the same penalties.
         self.values = [np.ones(self.d)] * self.n_arms
-        self.theta = [np.ones(self.d)] * self.n_arms
+        self.theta = self.values
 
-    # Selection of the arm happens using epsilon-greedy strategy
     def select_arm(self, **kwargs):
         variations = kwargs.get('variations')
 
@@ -33,9 +31,6 @@ class SoftmaxExplorer(MABModel):
             
         return np.random.choice(self.n_arms, p=flattenedArr)
 
-    # Updating of values happens using penalty values
-    # Method takes as input the index of the arm that was played and the observed penalty,
-    # and updates the estimated value of that arm using the formula for a sample mean.
     def update(self, **kwargs):
         arm = kwargs.get('arm')
         penalty = kwargs.get('penalty')

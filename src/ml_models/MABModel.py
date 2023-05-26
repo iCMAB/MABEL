@@ -8,7 +8,7 @@ class MABModel(ABC):
         Implementations will use this method to select an arm based on the information given to the model
         
         Args:
-            **kwargs: The information given to the model. May include the sensor readings
+            **kwargs: The information given to the model used to select an arm. May include the sensor readings
         """
         pass
 
@@ -18,8 +18,6 @@ class MABModel(ABC):
         Implementations will use this method to update the model based on the reading and the penalty incurred
         
         Args:
-            arm (int): The arm that was selected
-            x (list): The reading of the sensor whose arm was selected
-            penalty (float): The penalty incurred by the selected arm
+            **kwargs: The information given to the model to update itself. May include the arm that was selected, the reading of the sensor whose arm was selected, and the penalty incurred by the selected arm
         """
         pass

@@ -46,7 +46,7 @@ class ACVUpdater(Observable):
         if (len(self.acvs) <= 1):
             raise Exception('Please initialize 2 or more ACVs with unique indexes from the CSV file.')
         
-        write_config('avs', 'num_acvs', len(self.acvs))
+        write_config('acvs', 'num_acvs', len(self.acvs))
 
     def calculate_mod_iterations(self) -> dict:
         """

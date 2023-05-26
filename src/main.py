@@ -7,19 +7,19 @@ from mapek.Planner import Planner
 from mapek.Executer import Executer
 from subject.ACVUpdater import ACVUpdater
 
-from ml_models.linearUCB import LinearUCB
-from ml_models.linearTS import LinearThompsonSampling
+from ml_models.LinearUCB import LinearUCB
+from ml_models.LinearTS import LinearThompsonSampling
 from ml_models.EpsilonGreedy import EpsilonGreedy
 from ml_models.UCB1 import UCB1_Normal_Penalized
-from ml_models.bootstrappedUCB import BootstrappedUCB
+from ml_models.BootstrappedUCB import BootstrappedUCB
 from ml_models.SoftmaxExplorer import SoftmaxExplorer
 
 from config import get_config 
 
 model_options = [
     ('LinearUCB', LinearUCB),
-    ('LinearThompsonSampling', LinearThompsonSampling),
-    ('BernoulliEpsilon', EpsilonGreedy),
+    ('LinearTS', LinearThompsonSampling),
+    ('EpsilonGreedy', EpsilonGreedy),
     ('UCB1', UCB1_Normal_Penalized),
     ('BootstrappedUCB', BootstrappedUCB),
     ('SoftmaxExplorer', SoftmaxExplorer),
