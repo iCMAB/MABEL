@@ -138,9 +138,6 @@ class Logger:
             iteration (int): The current iteration.
             crash_list (dict): A list of crashes that occurred in the current iteration.
         """
-
-        if (not get_config('output', 'show_output_table')):
-            return
         
         if iteration == 0:
             self.print_table_header()
@@ -159,8 +156,12 @@ class Logger:
         dist_record[0] = "N/A"
         self.distance_records.append(distances.copy())
 
-        # Get flags before conputing the column aggregate so that cell highlighting can be applied
+        # Get flags before computing the column aggregate so that cell highlighting can be applied
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
+
+        # Stop output if applicable only after data has been updated in records
+        if (not get_config('output', 'show_output_table')):
+            return
 
         # Color all cells which the ACV is ignoring green
         for acv_index in self.acvs_ignoring_sensor:
@@ -180,6 +181,9 @@ class Logger:
 
     def print_table_header(self):
         """Prints the table header"""
+
+        if (not get_config('output', 'show_output_table')):
+            return
 
         ideal_dist = get_config('acvs', 'ideal_distance')
         num_iterations = get_config('simulation', 'iterations')
@@ -271,11 +275,11 @@ class Logger:
         print("• Improvement in total regret:\t" + str(regret_improvement) + "%")
 
         if (current_sim == num_sim_runs):
-            self.start_visualization()
-
             if (num_sim_runs > 1):
                 self.print_improvements_lists()
-            
+
+            self.start_visualization()
+
             print(get_config('output', 'major_divider'))
 
     def start_visualization(self):
@@ -286,7 +290,16 @@ class Logger:
 
         response = ''
         while (response != 'y' and response != 'n'):
-            response = input("Would you like to run the visualization? [y/n] ").lower()
+            num_sim_runs = get_config('simulation', 'num_simulation_runs')
+
+            # Clarify which simulation you are visualizing if running multiple simulations
+            prompt = "Would you like to run the visualization"
+            sim_distinction = ""
+            if (num_sim_runs > 1):
+                sim_distinction = " (Sim. " + str(num_sim_runs) + "/" + str(num_sim_runs) + ")"
+            
+            prompt += sim_distinction + "? [y/n] "
+            response = input(prompt).lower()
 
         if (response == 'y'):
             print("Starting visualization...\n")

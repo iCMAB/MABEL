@@ -48,6 +48,7 @@ def create_graph(model_name: str):
     global app, locations, time_interval, fig, normal_colors
     
     acv_count = len(locations[0])
+    total_iterations = len(locations)
     normal_colors *= acv_count
     y = [(acv_count - 1) - i for i in range(acv_count)]
 
@@ -117,7 +118,7 @@ def create_graph(model_name: str):
         dcc.Slider(
             id="year-slider",
             min=0,
-            max=100,
+            max=total_iterations,
             value=0,
             marks=None,
             tooltip={"placement": "bottom", "always_visible": False}
