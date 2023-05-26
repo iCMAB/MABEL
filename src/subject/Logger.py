@@ -6,6 +6,9 @@ from subject.Visualization import start_visualizer
 
 from config import get_config
 
+penalty_improvements = list()
+regret_improvements = list()
+
 class Logger:
     """
     Used to log a visual representation of the ACV simulation to the console
@@ -136,6 +139,9 @@ class Logger:
             crash_list (dict): A list of crashes that occurred in the current iteration.
         """
 
+        if (not get_config('output', 'show_output_table')):
+            return
+        
         if iteration == 0:
             self.print_table_header()
 
@@ -179,13 +185,14 @@ class Logger:
         num_iterations = get_config('simulation', 'iterations')
 
         # Print out ideal distance and which iterations will be modified
-        print("=====================================\n")
-        print("• MAB model: " + self.model_name)
-        print("• ACV count: " + str(self.num_acvs))
-        print("• Ideal distance: " + str(ideal_dist))
-        print("• Total iterations: " + str(num_iterations))
-        print("• Iterations Being modified: ", 
-            *["\n   > Iter. " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
+        print(get_config('output', 'major_divider'))
+
+        print("• MAB Model: " + self.model_name)
+        print("• ACV Count: " + str(self.num_acvs))
+        print("• Ideal Distance: " + str(ideal_dist))
+        print("• Total Iterations: " + str(num_iterations))
+        print("• Iterations Being Modified: ", 
+            *["\n   > Iter. " + str(iteration) + "\t(ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
         print("\nPress enter to continue...")
         input()
@@ -217,7 +224,14 @@ class Logger:
         def round_two_decimals(value: float) -> str:
             return '{0:.2f}'.format(value)
 
-        print("\n=====================================\n")
+        global penalty_improvements, regret_improvements
+
+        print(get_config('output', 'major_divider'))
+
+        num_sim_runs = get_config('simulation', 'num_simulation_runs')
+        current_sim = len(penalty_improvements) + 1
+        if (num_sim_runs > 1):
+            print("Simulation " + str(current_sim) + " of " + str(num_sim_runs) + ":")
 
         table=[
             [
@@ -229,7 +243,7 @@ class Logger:
             ] for acv in self.acvs]
         headers=["ACV Index", "Penalty", "Regret", "Baseline Penalty", "Baseline Regret"]
         
-        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))
+        print(tabulate(table, headers, tablefmt="psql", disable_numparse=True))
 
         # Bullet point metrics
         avg_penalty = round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / self.num_acvs)
@@ -240,7 +254,12 @@ class Logger:
         penalty_improvement = round_two_decimals((float(avg_baseline_penalty) - float(avg_penalty)) / float(avg_baseline_penalty) * 100)
         regret_improvement = round_two_decimals((float(total_baseline_regret) - float(total_regret)) / float(total_baseline_regret) * 100)
 
+        penalty_improvements.append(penalty_improvement)
+        regret_improvements.append(regret_improvement)
+
         print("\n" + self.model_name + " Metrics:")
+        print(get_config('output', 'minor_divider'))
+
         print("• Total crashes: " + str(crashes))
         
         print("• Average penalty:\t\tAverage baseline penalty:")
@@ -251,11 +270,20 @@ class Logger:
         print("• Improvement in avg penalty:\t" + str(penalty_improvement) + "%")
         print("• Improvement in total regret:\t" + str(regret_improvement) + "%")
 
-        print("\n=====================================\n")
+        if (current_sim == num_sim_runs):
+            self.start_visualization()
 
-        self.start_visualization()
+            if (num_sim_runs > 1):
+                self.print_improvements_lists()
+            
+            print(get_config('output', 'major_divider'))
 
     def start_visualization(self):
+        if (not get_config('output', 'prompt_visualization')):
+            return
+
+        print(get_config('output', 'major_divider'))
+
         response = ''
         while (response != 'y' and response != 'n'):
             response = input("Would you like to run the visualization? [y/n] ").lower()
@@ -271,5 +299,13 @@ class Logger:
                 self.crash_records, 
                 self.model_name)
         else:
-            print("Exiting...\n")
-            exit()
+            print("Exiting...")
+
+    def print_improvements_lists(self):
+        print(get_config('output', 'major_divider'))
+
+        print("Metrics for All Simulations:")
+
+        table = [[i + 1, penalty_improvements[i], regret_improvements[i]] for i in range(len(penalty_improvements))]
+        headers = ["Simulation", "Improvement in Average Penalty", "Improvement in Total Regret"]
+        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))

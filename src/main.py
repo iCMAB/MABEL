@@ -5,7 +5,9 @@ from mapek.Monitor import Monitor
 from mapek.Analyzer import Analyzer
 from mapek.Planner import Planner
 from mapek.Executer import Executer
+
 from subject.ACVUpdater import ACVUpdater
+from subject.Logger import Logger
 
 from ml_models.LinearUCB import LinearUCB
 from ml_models.LinearTS import LinearThompsonSampling
@@ -27,9 +29,6 @@ model_options = [
 
 def run_simulation():
     """Runs the ACV simulation."""
-
-    knowledge = Knowledge()
-    updater = ACVUpdater()
     
     model = select_model()
 
@@ -40,6 +39,8 @@ def run_simulation():
     n_bootstrap = get_config('mab', 'n_bootstrap')
     ideal_distance = get_config('acvs', 'ideal_distance') 
 
+    knowledge = Knowledge()
+    
     knowledge.ideal_distance = ideal_distance
     knowledge.mab_model = model(
         d = d,
@@ -50,18 +51,23 @@ def run_simulation():
         n_bootstrap = n_bootstrap,
     )
 
-    executer = Executer(updater)
-    planner = Planner(executer)
-    analyzer = Analyzer(planner)
-    monitor = Monitor(analyzer)
+    num_sim_runs = get_config('simulation', 'num_simulation_runs')
+    for _ in range(num_sim_runs):
+        updater = ACVUpdater()
+        executer = Executer(updater)
+        planner = Planner(executer)
+        analyzer = Analyzer(planner)
+        monitor = Monitor(analyzer)
 
-    updater.register(monitor)
-    updater.run_update_loop()
+        updater.register(monitor)
+        updater.run_update_loop()
 
 def select_model():
     """Selects the model to use for the simulation."""
 
-    print("\nSelect a model:\n")
+    print("\nSelect a model:")
+    print(get_config('output', 'minor_divider'))
+    
     for i, model in enumerate(model_options):
         print(f"{i + 1}. {model[0]}")
 
