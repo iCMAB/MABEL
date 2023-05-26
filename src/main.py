@@ -13,6 +13,7 @@ from ml_models.EpsilonGreedy import EpsilonGreedy
 from ml_models.UCB1 import UCB1_Normal_Penalized
 from ml_models.bootstrappedUCB import BootstrappedUCB
 from ml_models.SoftmaxExplorer import SoftmaxExplorer
+from ml_models.bootstrappedTS import BootstrappedThompsonSampling
 
 model_options = [
     ('LinearUCB', LinearUCB),
@@ -20,6 +21,7 @@ model_options = [
     ('BernoulliEpsilon', EpsilonGreedy),
     ('UCB1', UCB1_Normal_Penalized),
     ('BootstrappedUCB', BootstrappedUCB),
+    ('BootstrappedTS', BootstrappedThompsonSampling),
     ('SoftmaxExplorer', SoftmaxExplorer),
 ]
 
