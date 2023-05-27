@@ -5,7 +5,7 @@ from ml_models.MABModel import MABModel
 
 
 class EpsilonGreedy(MABModel):
-    # theta - penalty calculator
+    # theta = penalty calculator
     def __init__(self, **kwargs):
         self.n_arms = kwargs.get('n_arms')
 
@@ -34,9 +34,10 @@ class EpsilonGreedy(MABModel):
             return np.argmax(theta)
 
     # Updating of values happens using penalty values
-    # Method takes as input the index of the arm that was played and the observed penalty,
-    # and updates the estimated value of that arm using the formula for a sample mean.
+    # 
     def update(self, **kwargs):
+        """
+        Method takes as input the index of the arm that was played and the observed penalty, and updates the estimated value of that arm using the formula for a sample mean."""
         arm = kwargs.get('arm')
         penalty = kwargs.get('penalty')
 
