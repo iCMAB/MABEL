@@ -38,7 +38,7 @@ class BootstrappedUCB(MABModel):
                 upper_confidence_bounds[i] += bootstrap_upper_confidence_bounds[i]
 
             arm = np.argmax(upper_confidence_bounds)
-
+        
         self.t += 1
         return arm
 

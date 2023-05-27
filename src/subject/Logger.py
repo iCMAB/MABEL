@@ -4,6 +4,11 @@ from tabulate import tabulate
 from mapek.Knowledge import Knowledge
 from subject.Visualization import start_visualizer
 
+from config import get_config
+
+penalty_improvements = list()
+regret_improvements = list()
+
 class Logger:
     """
     Used to log a visual representation of the ACV simulation to the console
@@ -34,12 +39,13 @@ class Logger:
         knowledge = Knowledge()
         
         self.acvs = acvs
+        self.num_acvs = get_config('acvs', 'num_acvs')
         self.iterations_to_mod = iterations_to_mod
         self.column_width = 9    # Width of each column
         self.iter_col_width = 4  # Iteration count column width
 
         # 3 columns per ACV (distance, speed, location) minus lead ACV columns
-        self.num_acv_columns = (len(acvs) - 1) * 3
+        self.num_acv_columns = (self.num_acvs - 1) * 3
         self.row_template = self.get_row_template()
 
         self.model_name = knowledge.mab_model.__class__.__name__
@@ -132,7 +138,7 @@ class Logger:
             iteration (int): The current iteration.
             crash_list (dict): A list of crashes that occurred in the current iteration.
         """
-
+        
         if iteration == 0:
             self.print_table_header()
 
@@ -150,8 +156,12 @@ class Logger:
         dist_record[0] = "N/A"
         self.distance_records.append(distances.copy())
 
-        # Get flags before conputing the column aggregate so that cell highlighting can be applied
+        # Get flags before computing the column aggregate so that cell highlighting can be applied
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
+
+        # Stop output if applicable only after data has been updated in records
+        if (not get_config('output', 'show_output_table')):
+            return
 
         # Color all cells which the ACV is ignoring green
         for acv_index in self.acvs_ignoring_sensor:
@@ -159,27 +169,34 @@ class Logger:
             
         # Print index and alternating speed/location columns for the respective ACV (// is floor division)
         lead_acv_col = [speeds[0], locations[0]]
-        trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, len(self.acvs))]))
+        trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, self.num_acvs)]))
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
 
-
-        end = '\n' if subject.AUTOMATIC_OUTPUT == True else ''
+        auto_output = get_config('output', 'automatic_output')
+        end = '\n' if auto_output == True else ''
         print(column_aggregate + flags, end=end)
         
-        if (subject.AUTOMATIC_OUTPUT == False):
+        if (auto_output == False):
             input()
 
     def print_table_header(self):
         """Prints the table header"""
 
+        if (not get_config('output', 'show_output_table')):
+            return
+
+        ideal_dist = get_config('acvs', 'ideal_distance')
+        num_iterations = get_config('simulation', 'iterations')
+
         # Print out ideal distance and which iterations will be modified
-        print("=====================================\n")
-        print("• MAB model: " + self.model_name)
-        print("• ACV count: " + str(len(self.acvs)))
-        print("• Ideal distance: " + str(subject.IDEAL_DISTANCE))
-        print("• Total iterations: " + str(subject.ITERATIONS))
-        print("• Iterations Being modified: ", 
-            *["\n   > Iter. " + str(iteration) + " (ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
+        print(get_config('output', 'major_divider'))
+
+        print("• MAB Model: " + self.model_name)
+        print("• ACV Count: " + str(self.num_acvs))
+        print("• Ideal Distance: " + str(ideal_dist))
+        print("• Total Iterations: " + str(num_iterations))
+        print("• Iterations Being Modified: ", 
+            *["\n   > Iter. " + str(iteration) + "\t(ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
         print("\nPress enter to continue...")
         input()
@@ -189,7 +206,7 @@ class Logger:
 
         # Lead ACV column is 19 wide (2 6-wide columns + 1 1-character divider)
         # All other ACV columns are 30 wide (3 5-wide columns + 2 1-character dividers)
-        acv_template = "||".join(['{:>{iter}}', '{:^{lead_acv}}'] + ['{:^{acv}}' for _ in range(len(self.acvs) - 1)])
+        acv_template = "||".join(['{:>{iter}}', '{:^{lead_acv}}'] + ['{:^{acv}}' for _ in range(self.num_acvs - 1)])
         print(acv_template.format(*acv_headers, iter=self.iter_col_width, lead_acv=(self.column_width * 2 + 1), acv=(self.column_width * 3 + 2)))
 
         # Headers for iteration index and alternating speed/location columns
@@ -211,7 +228,14 @@ class Logger:
         def round_two_decimals(value: float) -> str:
             return '{0:.2f}'.format(value)
 
-        print("\n=====================================\n")
+        global penalty_improvements, regret_improvements
+
+        print(get_config('output', 'major_divider'))
+
+        num_sim_runs = get_config('simulation', 'num_simulation_runs')
+        current_sim = len(penalty_improvements) + 1
+        if (num_sim_runs > 1):
+            print("Simulation " + str(current_sim) + " of " + str(num_sim_runs) + ":")
 
         table=[
             [
@@ -222,18 +246,24 @@ class Logger:
                 round_two_decimals(acv.baseline_regret)
             ] for acv in self.acvs]
         headers=["ACV Index", "Penalty", "Regret", "Baseline Penalty", "Baseline Regret"]
-        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))
         
+        print(tabulate(table, headers, tablefmt="psql", disable_numparse=True))
+
         # Bullet point metrics
-        avg_penalty = round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / len(self.acvs))
-        avg_baseline_penalty = round_two_decimals(sum([acv.baseline_penalty for acv in self.acvs]) / len(self.acvs))
+        avg_penalty = round_two_decimals(sum([acv.total_penalty for acv in self.acvs]) / self.num_acvs)
+        avg_baseline_penalty = round_two_decimals(sum([acv.baseline_penalty for acv in self.acvs]) / self.num_acvs)
         total_regret = round_two_decimals(sum([acv.total_regret for acv in self.acvs]))
         total_baseline_regret = round_two_decimals(sum([acv.baseline_regret for acv in self.acvs]))
 
         penalty_improvement = round_two_decimals((float(avg_baseline_penalty) - float(avg_penalty)) / float(avg_baseline_penalty) * 100)
         regret_improvement = round_two_decimals((float(total_baseline_regret) - float(total_regret)) / float(total_baseline_regret) * 100)
 
+        penalty_improvements.append(penalty_improvement)
+        regret_improvements.append(regret_improvement)
+
         print("\n" + self.model_name + " Metrics:")
+        print(get_config('output', 'minor_divider'))
+
         print("• Total crashes: " + str(crashes))
         
         print("• Average penalty:\t\tAverage baseline penalty:")
@@ -244,14 +274,32 @@ class Logger:
         print("• Improvement in avg penalty:\t" + str(penalty_improvement) + "%")
         print("• Improvement in total regret:\t" + str(regret_improvement) + "%")
 
-        print("\n=====================================\n")
+        if (current_sim == num_sim_runs):
+            if (num_sim_runs > 1):
+                self.print_improvements_lists()
 
-        self.start_visualization()
+            self.start_visualization()
+
+            print(get_config('output', 'major_divider'))
 
     def start_visualization(self):
+        if (not get_config('output', 'prompt_visualization')):
+            return
+
+        print(get_config('output', 'major_divider'))
+
         response = ''
         while (response != 'y' and response != 'n'):
-            response = input("Would you like to run the visualization? [y/n] ").lower()
+            num_sim_runs = get_config('simulation', 'num_simulation_runs')
+
+            # Clarify which simulation you are visualizing if running multiple simulations
+            prompt = "Would you like to run the visualization"
+            sim_distinction = ""
+            if (num_sim_runs > 1):
+                sim_distinction = " (Sim. " + str(num_sim_runs) + "/" + str(num_sim_runs) + ")"
+            
+            prompt += sim_distinction + "? [y/n] "
+            response = input(prompt).lower()
 
         if (response == 'y'):
             print("Starting visualization...\n")
@@ -264,5 +312,13 @@ class Logger:
                 self.crash_records, 
                 self.model_name)
         else:
-            print("Exiting...\n")
-            exit()
+            print("Exiting...")
+
+    def print_improvements_lists(self):
+        print(get_config('output', 'major_divider'))
+
+        print("Metrics for All Simulations:")
+
+        table = [[i + 1, penalty_improvements[i], regret_improvements[i]] for i in range(len(penalty_improvements))]
+        headers = ["Simulation", "Improvement in Average Penalty", "Improvement in Total Regret"]
+        print(tabulate(table, headers, tablefmt="fancy_grid", disable_numparse=True))

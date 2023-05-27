@@ -32,6 +32,7 @@ class Planner(Component):
         regrets = list()
 
         # Simply the penalties and regrets from distance sensor readings. Baseline values used to show what would have happened if no distance sensor correction has been performed. 
+        # Used in analytics calculation at the end of the simulation
         baseline_penalties = list()
         baseline_regrets = list()
         
@@ -40,22 +41,25 @@ class Planner(Component):
 
         for (index, acv) in enumerate(trailing_acvs):
             sensor_penalty = penalties[index][0]
-            actual_penalty = penalties[index][1]
+            ground_truth_penalty = penalties[index][1]
 
+            # "new_speeds" is how fast the ACVs SHOULD go. Subtracting the target speed gives us the modifier to add to the current speed to get the desired speed
             normal_modifier = new_speeds[index][0] - acv.target_speed
-            predicted_modifier = new_speeds[index][1] - acv.target_speed  # Defaults to target speed if actual modifier has a low enough confidence. May replace with something more sophisticated at some point.
+            ground_truth_modifier = new_speeds[index][1] - acv.target_speed
            
             modifier_to_add = normal_modifier
             penalty_to_incur = sensor_penalty
 
+            # If a bad sensor has been detected, ignore the sensor reading and use the ground truth value instead
+            # Ground truth value acts as a "predicted" distance value for our sake
             if bad_sensor != None and index == bad_sensor:
-                modifier_to_add = predicted_modifier
-                penalty_to_incur = actual_penalty
+                modifier_to_add = ground_truth_modifier
+                penalty_to_incur = ground_truth_penalty
                 acvs_ignoring_sensor.append(index + 1)   # ACV0 not counted, so add 1 to index
             
             # Regret (R) = modded penalty (Pm) - actual penalty (Pa) → R = Pm - Pa
-            regret = penalty_to_incur - actual_penalty
-            baseline_regret = sensor_penalty - actual_penalty
+            regret = penalty_to_incur - ground_truth_penalty
+            baseline_regret = sensor_penalty - ground_truth_penalty
 
             speed_modifiers.append(modifier_to_add)
             chosen_penalties.append(penalty_to_incur)
