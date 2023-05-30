@@ -1,3 +1,4 @@
+from ml_models.botzmanExploration import BoltzmanExploration
 import subject
 
 from mapek.Knowledge import Knowledge
@@ -18,6 +19,7 @@ model_options = [
     ('LinearThompsonSampling', LinearThompsonSampling),
     ('BernoulliEpsilon', EpsilonGreedy),
     ('UCB1', UCB1_Normal_Penalized),
+    ('Boltzman', BoltzmanExploration),
     ('BootstrappedUCB',BootstrappedUCB)
 ]
 

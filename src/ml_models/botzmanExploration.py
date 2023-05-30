@@ -20,7 +20,6 @@ class BoltzmanExploration(MABModel):
 
     def update(self, **kwargs):
         arm = kwargs.get('arm')
-        x = kwargs.get('x')
         penalty = kwargs.get('penalty')
         self.action_count[arm] += 1
         alpha = 1 / self.action_count[arm]
