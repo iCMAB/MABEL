@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-from ml_models.MABModel import MABModel
+from .MAB_model import MABModel
 
 
 class EpsilonGreedy(MABModel):

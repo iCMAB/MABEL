@@ -1,4 +1,5 @@
-from mapek.Component import Component
+from ..mapek import Component
+# TODO: Import coupling
 
 class Observable:
     """

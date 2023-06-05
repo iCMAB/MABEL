@@ -1,31 +1,8 @@
-import subject
+from mapek import Knowledge, Monitor, Analyzer, Planner, Executer
+from subject import ACVUpdater
+from ml_models import MODELS
 
-from mapek.Knowledge import Knowledge
-from mapek.Monitor import Monitor
-from mapek.Analyzer import Analyzer
-from mapek.Planner import Planner
-from mapek.Executer import Executer
-
-from subject.ACVUpdater import ACVUpdater
-from subject.Logger import Logger
-
-from ml_models.LinearUCB import LinearUCB
-from ml_models.LinearTS import LinearThompsonSampling
-from ml_models.EpsilonGreedy import EpsilonGreedy
-from ml_models.UCB1 import UCB1_Normal_Penalized
-from ml_models.BootstrappedUCB import BootstrappedUCB
-from ml_models.SoftmaxExplorer import SoftmaxExplorer
-
-from config import get_config 
-
-model_options = [
-    ('LinearUCB', LinearUCB),
-    ('LinearTS', LinearThompsonSampling),
-    ('EpsilonGreedy', EpsilonGreedy),
-    ('UCB1', UCB1_Normal_Penalized),
-    ('BootstrappedUCB', BootstrappedUCB),
-    ('SoftmaxExplorer', SoftmaxExplorer),
-]
+from config import get_config
 
 def run_simulation():
     """Runs the ACV simulation."""
@@ -68,16 +45,16 @@ def select_model():
     print("\nSelect a model:")
     print(get_config('output', 'minor_divider'))
     
-    for i, model in enumerate(model_options):
+    for i, model in enumerate(MODELS):
         print(f"{i + 1}. {model[0]}")
 
     print()
 
     selection = ""
-    while (not selection.isdigit()) or (int(selection) not in range(1, len(model_options) + 1)):
+    while (not selection.isdigit()) or (int(selection) not in range(1, len(MODELS) + 1)):
         selection = input("Selection: ")
 
-    return model_options[int(selection) - 1][1]
+    return MODELS[int(selection) - 1][1]
 
 
 if __name__ == '__main__':

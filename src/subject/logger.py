@@ -1,10 +1,14 @@
-import subject, itertools, colorama
+import itertools, colorama
 
 from tabulate import tabulate
-from mapek.Knowledge import Knowledge
-from subject.Visualization import start_visualizer
 
-from config import get_config
+from ..mapek import Knowledge
+# TODO: Import coupling
+
+from .visualization import start_visualizer
+
+from ..config import get_config
+# TODO: Import coupling
 
 penalty_improvements = list()
 regret_improvements = list()

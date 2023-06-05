@@ -1,5 +1,6 @@
 import numpy as np
-from ml_models.MABModel import MABModel
+
+from .MAB_model import MABModel
 
 """Seeks to minimize penalty"""
 class UCB1_Normal_Penalized(MABModel):

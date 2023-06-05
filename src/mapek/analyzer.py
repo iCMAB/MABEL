@@ -1,9 +1,8 @@
-from mapek.Component import Component
-from mapek.Knowledge import Knowledge
-from mapek.Planner import Planner
 from copy import deepcopy
 
-from config import get_config
+from .component import Component
+from .knowledge import Knowledge
+from .planner import Planner
 
 class Analyzer(Component):
     """

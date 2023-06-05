@@ -1,11 +1,13 @@
-import pandas, subject, random
+import pandas, random
 
-from subject.Observable import Observable
-from subject.ACV import ACV
-from subject.Logger import Logger
-from mapek.Knowledge import Knowledge
+from .observable import Observable
+from .ACV import ACV
+from .logger import Logger
+from ..mapek import Knowledge
+# TODO: Import coupling
 
-from config import get_config, write_config
+from ..config import get_config, write_config
+# TODO: Import coupling
 
 class ACVUpdater(Observable):
     """

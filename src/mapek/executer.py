@@ -1,5 +1,4 @@
-from mapek.Component import Component
-from mapek.Knowledge import Knowledge
+from .component import Component
 
 from subject.ACVUpdater import ACVUpdater
 

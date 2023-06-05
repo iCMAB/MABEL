@@ -1,7 +1,7 @@
-from mapek.Knowledge import Knowledge
-from mapek.Analyzer import Analyzer
-from mapek.Observer import Observer
-from mapek.Component import Component
+from .knowledge import Knowledge
+from .analyzer import Analyzer
+from .observer import Observer
+from .component import Component
 
 from copy import deepcopy
 
