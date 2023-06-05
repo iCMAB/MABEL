@@ -7,6 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+ENV DOCKER=true
+ENV MODEL=EpsilonGreedy
+
 EXPOSE 8050
 
 CMD [ "python", "./src/main.py" ]

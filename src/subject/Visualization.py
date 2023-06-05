@@ -41,7 +41,7 @@ def start_visualizer(loc_list: list, speed_list: dict, dist_list: dict, ignore_l
 
     create_graph(model_name)
     Timer(1, open_browser).start()
-    app.run_server()
+    app.run(host='0.0.0.0')
     
 
 def create_graph(model_name: str):
