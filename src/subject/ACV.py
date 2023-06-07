@@ -1,6 +1,5 @@
-import subject
-
-from config import get_config
+from ..config import get_config
+# TODO: Import coupling
 
 class ACV:
     """Represents an Autonomously Controlled Vehicle (ACV). Travels in one dimension.

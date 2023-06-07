@@ -1,10 +1,14 @@
-import subject, itertools, colorama
+import itertools, colorama
 
 from tabulate import tabulate
-from mapek.Knowledge import Knowledge
-from subject.Visualization import start_visualizer
 
-from config import get_config
+from ..mapek import Knowledge
+# TODO: Import coupling
+
+from .visualization import start_visualizer
+
+from ..config import get_config
+# TODO: Import coupling
 
 penalty_improvements = list()
 regret_improvements = list()
@@ -160,7 +164,7 @@ class Logger:
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
 
         # Stop output if applicable only after data has been updated in records
-        if (not get_config('output', 'show_output_table')):
+        if not get_config('output', 'show_output_table'):
             return
 
         # Color all cells which the ACV is ignoring green
@@ -173,16 +177,16 @@ class Logger:
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
 
         auto_output = get_config('output', 'automatic_output')
-        end = '\n' if auto_output == True else ''
+        end = '\n' if auto_output else ''
         print(column_aggregate + flags, end=end)
         
-        if (auto_output == False):
+        if not auto_output:
             input()
 
     def print_table_header(self):
         """Prints the table header"""
 
-        if (not get_config('output', 'show_output_table')):
+        if not get_config('output', 'show_output_table'):
             return
 
         ideal_dist = get_config('acvs', 'ideal_distance')
@@ -198,8 +202,8 @@ class Logger:
         print("• Iterations Being Modified: ", 
             *["\n   > Iter. " + str(iteration) + "\t(ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
-        print("\nPress enter to continue...")
-        input()
+        if not get_config('output', 'automatic_output'):
+            input("\nPress enter to continue...")
 
         # Header for ACV index (ACV1, ACV2, etc.)
         acv_headers = [''] + ['ACV' + str(acv.index) for acv in self.acvs]
@@ -299,9 +303,13 @@ class Logger:
                 sim_distinction = " (Sim. " + str(num_sim_runs) + "/" + str(num_sim_runs) + ")"
             
             prompt += sim_distinction + "? [y/n] "
-            response = input(prompt).lower()
 
-        if (response == 'y'):
+            if not get_config('output', 'automatic_output'):
+                response = input(prompt).lower()
+            else:
+                response = "y"
+
+        if response == 'y':
             print("Starting visualization...\n")
             start_visualizer(
                 self.position_records, 

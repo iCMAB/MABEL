@@ -1,6 +1,6 @@
 import numpy as np
 
-from ml_models.MABModel import MABModel
+from .MAB_model import MABModel
 
 class LinearThompsonSampling(MABModel):
     def __init__(self, **kwargs):

@@ -1,6 +1,5 @@
-from mapek.Component import Component
-from mapek.Executer import Executer
-from mapek.Knowledge import Knowledge
+from .component import Component
+from .executer import Executer
 
 class Planner(Component):
     """The MAPE-K loop planner component.

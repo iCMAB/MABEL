@@ -1,7 +1,7 @@
-import numpy as np
 import math
+import numpy as np
 
-from ml_models.MABModel import MABModel
+from .MAB_model import MABModel
 
 class LinearUCB(MABModel):
     def __init__(self, **kwargs):

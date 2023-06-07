@@ -1,12 +1,10 @@
+import numpy as np
+import os, webbrowser, time
+
 from dash import dash, dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 from threading import Timer
-
-import numpy as np
-import os, webbrowser, time
-
-import random
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, update_title='Loading...')
@@ -41,7 +39,7 @@ def start_visualizer(loc_list: list, speed_list: dict, dist_list: dict, ignore_l
 
     create_graph(model_name)
     Timer(1, open_browser).start()
-    app.run_server()
+    app.run(host='0.0.0.0')
     
 
 def create_graph(model_name: str):
