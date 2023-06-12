@@ -1,6 +1,5 @@
-from .component import Component
-
-from subject.ACVUpdater import ACVUpdater
+from mapek.Component import Component
+from mapek.Knowledge import Knowledge
 
 class Executer(Component):
     """
@@ -10,7 +9,7 @@ class Executer(Component):
         sensor (ACVUpdater): The distance sensor to send adaptation information back to.
     """
 
-    def __init__(self, sensor: ACVUpdater):
+    def __init__(self, sensor):
         """
         Initializes the MAPE-K loop executer with the distance sensor.
         

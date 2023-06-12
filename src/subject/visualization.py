@@ -1,10 +1,10 @@
-import numpy as np
 import os, webbrowser, time
+from threading import Timer
+import numpy as np
 
 from dash import dash, dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
-from threading import Timer
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, update_title='Loading...')
@@ -16,6 +16,7 @@ ignores = []
 modifications = []
 crashes = []
 
+# TODO: Add below config options to config.yml
 time_interval = 1000
 fig = None
 range_padding = 15
@@ -26,7 +27,8 @@ mod_color = 'yellow'
 crash_color = 'red'
 ignore_color = 'green'
 marker_stroke = 3
-    
+
+# TODO: Needs cleaning and re-formatting
 def start_visualizer(loc_list: list, speed_list: dict, dist_list: dict, ignore_list: dict, mod_dict: dict, crash_list: list, model_name: str):
     global locations, speeds, distances, ignores, modifications, crashes
 

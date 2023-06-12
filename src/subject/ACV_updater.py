@@ -1,12 +1,11 @@
 import pandas, random
+from ast import literal_eval
 
-from .observable import Observable
+from .observer import Observable
 from .ACV import ACV
 from .logger import Logger
-from ..mapek import Knowledge
-# TODO: Import coupling
-
-from ..config import get_config, write_config
+from src.mapek import Knowledge
+from src.utils import CONFIG
 # TODO: Import coupling
 
 class ACVUpdater(Observable):
@@ -47,8 +46,6 @@ class ACVUpdater(Observable):
 
         if (len(self.acvs) <= 1):
             raise Exception('Please initialize 2 or more ACVs with unique indexes from the CSV file.')
-        
-        write_config('acvs', 'num_acvs', len(self.acvs))
 
     def calculate_mod_iterations(self) -> dict:
         """
@@ -58,10 +55,10 @@ class ACVUpdater(Observable):
             dict: A dictionary of iterations to modify as keys and the ACV to modify as well as amount to modify them by as the values.
         """
 
-        num_iterations = get_config('simulation', 'iterations')
-        mod_percent = get_config('simulation', 'percent_modified')
-        training_iters = get_config('simulation', 'training_iterations')
-        mod_range = get_config('simulation', 'mod_range')
+        num_iterations = int(CONFIG["simulation"]["iterations"])
+        mod_percent = float(CONFIG["simulation"]["sensor_failure_rate"]) * 100
+        training_iters = int(CONFIG["simulation"]["training_iterations"])
+        mod_range = literal_eval(CONFIG["simulation"]["sensor_failure_range"])
 
         num_modded = round(num_iterations * mod_percent) # Floors the decimal value for all positive numbers
 
@@ -70,7 +67,7 @@ class ACVUpdater(Observable):
         iteration_mod_pair = {
             iteration:
             (
-                random.randint(1, get_config('acvs', 'num_acvs') - 1), # ACV index
+                random.randint(1, int(CONFIG["acvs"]["num_acvs"]) - 1), # ACV index
                 round(random.uniform(mod_range[0], mod_range[1]), 2) # Mod amount
             )
             for iteration in mod_iterations
@@ -84,7 +81,7 @@ class ACVUpdater(Observable):
 
         logger = Logger(self.acvs, self.iterations_to_mod)
 
-        for i in range(get_config('simulation', 'iterations') + 1):
+        for i in range(int(CONFIG["simulation"]["iterations"]) + 1):
             self.iteration = i
 
             # Only update after first iteration so iteration 0 displays the starting values

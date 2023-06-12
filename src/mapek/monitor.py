@@ -1,9 +1,8 @@
+from copy import deepcopy
+
 from .knowledge import Knowledge
 from .analyzer import Analyzer
-from .observer import Observer
 from .component import Component
-
-from copy import deepcopy
 
 class Monitor(Observer, Component):
     """

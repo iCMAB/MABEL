@@ -3,6 +3,7 @@ from copy import deepcopy
 from .component import Component
 from .knowledge import Knowledge
 from .planner import Planner
+from src.utils import CONFIG
 
 class Analyzer(Component):
     """
@@ -57,7 +58,6 @@ class Analyzer(Component):
         new_speeds = list()
         penalties = list()
 
-        index = 0
         for (index, acv) in enumerate(self.trailing_acvs):
             sensor_distance = acv.distance
             ground_truth_distance = knowledge.actual_distances[index]
@@ -72,9 +72,7 @@ class Analyzer(Component):
 
             # Tuples of (new value, ground truth value) to be decided by the planner
             new_speeds.append((new_speed, ground_truth_speed))
-            penalties.append((sensor_penalty, ground_truth_penalty)) 
-
-            index += 1
+            penalties.append((sensor_penalty, ground_truth_penalty))
 
         self.planner.execute(new_speeds, penalties, self.bad_sensor, self.trailing_acvs)
         
@@ -86,7 +84,7 @@ class Analyzer(Component):
         
         self.bad_sensor = None
 
-        readings = [acv.distance for acv in self.trailing_acvs]        
+        readings = [acv.distance for acv in self.trailing_acvs]
         variations = [abs(knowledge.ideal_distance - reading) for reading in readings]
 
         arm = model.select_arm(variations=variations)
@@ -96,7 +94,7 @@ class Analyzer(Component):
         predicted_penalty = model.theta[arm]
         residual = abs(penalty - predicted_penalty)
 
-        if residual > get_config('mab', 'residual_threshold'):
+        if residual > CONFIG["mab"]["residual_threshold"]:
             self.bad_sensor = arm
 
             # New penalty with actual, unmodified distance to reward model for selecting correctly
@@ -106,12 +104,13 @@ class Analyzer(Component):
 
     def calculate_penalty(self, distance, index) -> float:
         """
-        Calculates what the penalty would be for an ACV with a given distance value by using the formula Penalty (P) = variation (V) from desired ^2 → P = V^2 and 
-        by predicting if a crash would occur
+        Calculates what the penalty would be for an ACV with a given distance value by using the formula
+            Penalty (P) = variation (V) from desired ^2 → P = V^2
+        and by predicting if a crash would occur
         
         Args:
-            distance (float): What the distance sensor percieves is the distance between the given ACV and the one in front of it
-            index (int): The index of the ACV in the given list of ACV distances and locations (0 is ACV1, 1 is ACV2, etc.)            
+            distance (float): What the distance sensor perceives is the distance between the given ACV and the one in front of it
+            index (int): The index of the ACV in the given list of ACV distances and locations (0 is ACV1, 1 is ACV2, etc.)
 
         Returns:
             float: The penalty for the ACV

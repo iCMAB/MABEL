@@ -20,8 +20,7 @@ class EpsilonGreedy(MABModel):
     def select_arm(self, **kwargs):
         variations = kwargs.get('variations')
 
-        rand_val = random.uniform(0, 1)
-        if rand_val < self.epsilon:
+        if random.random() < self.epsilon:
             # Explore: Choose a random arm with probability epsilon
             return np.random.randint(0, len(self.theta))
         else:

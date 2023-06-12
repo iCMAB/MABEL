@@ -1,4 +1,4 @@
-from ..config import get_config
+from src.utils import CONFIG
 # TODO: Import coupling
 
 class ACV:
@@ -57,11 +57,11 @@ class ACV:
         self.baseline_penalty += baseline_penalty
         self.baseline_regret += baseline_regret
 
-        max_speed = get_config('acvs', 'max_speed')
+        max_speed = CONFIG["acvs"]["max_speed"]
         self.target_speed += speed_modifier
         self.target_speed = max(min(self.target_speed, max_speed), -max_speed)
 
-        easing = get_config('acvs', 'easing')
+        easing = CONFIG["acvs"]["easing"]
         self.speed = (self.speed + (self.target_speed - self.speed) * easing)
 
         self.location += self.speed

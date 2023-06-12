@@ -1,51 +1,27 @@
 from os import environ
 
-from mapek import Knowledge, Monitor, Analyzer, Planner, Executer
-from subject import ACVUpdater
-from ml_models import MABModel, MODELS
+from acvs.acv_manager import ACVManager
+from bandit_models import MABModel, MODELS
+from utils import CONFIG
 
-from config import get_config
+def main():
+    model = initialize_model()
+    run_simulation(model)
 
-
-def run_simulation():
+def run_simulation(model: MABModel):
     """Runs the ACV simulation."""
-    ideal_distance = get_config('acvs', 'ideal_distance')
-
-    knowledge = Knowledge()
-
-    knowledge.ideal_distance = ideal_distance
-    knowledge.mab_model = initialize_model()
-
-    num_sim_runs = get_config('simulation', 'num_simulation_runs')
-    for _ in range(num_sim_runs):
-        updater = ACVUpdater()
-        executer = Executer(updater)
-        planner = Planner(executer)
-        analyzer = Analyzer(planner)
-        monitor = Monitor(analyzer)
-
-        updater.register(monitor)
-        updater.run_update_loop()
-
+    manager = ACVManager(model)
+    for _ in range(CONFIG["simulation"]["num_simulation_runs"]):
+        manager.run_simulation()
 
 def initialize_model() -> MABModel:
     """Selects the model to use for the simulation."""
     model_cls = MODELS[get_model()]
 
-    d = get_config('mab', 'd')
-    alpha = get_config('mab', 'alpha')
-    epsilon = get_config('mab', 'epsilon')
-    n_arms = get_config('acvs', 'num_acvs') - 1
-    n_bootstrap = get_config('mab', 'n_bootstrap')
-    ideal_distance = get_config('acvs', 'ideal_distance')
-
     return model_cls(
-        d=d,
-        n_arms=n_arms,
-        ideal_distance=ideal_distance,
-        alpha=alpha,
-        epsilon=epsilon,
-        n_bootstrap=n_bootstrap,
+        n_arms=CONFIG["acvs"]["num_acvs"] + 1,
+        # epsilon=float(CONFIG["mab"]["epsilon"]),
+        # n_bootstrap=int(CONFIG["mab"]["n_bootstrap"]),
     )
 
 
@@ -60,7 +36,7 @@ def get_model() -> str:
 
     # If the environment variable doesn't exist, get it from user input
     print("\nSelect a model:")
-    print(get_config('output', 'minor_divider'))
+    print(CONFIG["logging"]["minor_divider"])
 
     selector = {}
     for i, key in enumerate(MODELS.keys(), start=1):
@@ -81,4 +57,4 @@ def get_model() -> str:
 
 
 if __name__ == '__main__':
-    run_simulation()
+    main()

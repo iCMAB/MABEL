@@ -2,13 +2,12 @@ import itertools, colorama
 
 from tabulate import tabulate
 
-from ..mapek import Knowledge
+from src.mapek import Knowledge
 # TODO: Import coupling
 
 from .visualization import start_visualizer
 
-from ..config import get_config
-# TODO: Import coupling
+from src.utils import CONFIG
 
 penalty_improvements = list()
 regret_improvements = list()
@@ -43,7 +42,7 @@ class Logger:
         knowledge = Knowledge()
         
         self.acvs = acvs
-        self.num_acvs = get_config('acvs', 'num_acvs')
+        self.num_acvs = int(CONFIG["acvs"]["num_acvs"])
         self.iterations_to_mod = iterations_to_mod
         self.column_width = 9    # Width of each column
         self.iter_col_width = 4  # Iteration count column width
@@ -164,7 +163,7 @@ class Logger:
         flags = self.find_iteration_flags(iteration, crash_list, locations, distances)
 
         # Stop output if applicable only after data has been updated in records
-        if not get_config('output', 'show_output_table'):
+        if not CONFIG["output"]["show_output_table"]:
             return
 
         # Color all cells which the ACV is ignoring green
@@ -176,7 +175,7 @@ class Logger:
         trailing_acv_cols = list(itertools.chain.from_iterable([[distances[i], speeds[i], locations[i]] for i in range(1, self.num_acvs)]))
         column_aggregate = self.row_template.format(iteration, *lead_acv_col, *trailing_acv_cols, iter=self.iter_col_width, width=self.column_width)
 
-        auto_output = get_config('output', 'automatic_output')
+        auto_output = CONFIG["output"]["automatic_output"]
         end = '\n' if auto_output else ''
         print(column_aggregate + flags, end=end)
         
@@ -186,14 +185,14 @@ class Logger:
     def print_table_header(self):
         """Prints the table header"""
 
-        if not get_config('output', 'show_output_table'):
+        if not bool(CONFIG["output"]["show_output_table"]):
             return
 
-        ideal_dist = get_config('acvs', 'ideal_distance')
-        num_iterations = get_config('simulation', 'iterations')
+        ideal_dist = float(CONFIG["acvs"]["target_distance"])
+        num_iterations = int(CONFIG["simulation"]["iterations"])
 
         # Print out ideal distance and which iterations will be modified
-        print(get_config('output', 'major_divider'))
+        print(CONFIG["output"]["major_divider"])
 
         print("• MAB Model: " + self.model_name)
         print("• ACV Count: " + str(self.num_acvs))
@@ -202,7 +201,7 @@ class Logger:
         print("• Iterations Being Modified: ", 
             *["\n   > Iter. " + str(iteration) + "\t(ACV" + str(value[0]) + ", " + str(value[1]) + "x)" for iteration, value in self.iterations_to_mod.items()])
 
-        if not get_config('output', 'automatic_output'):
+        if not CONFIG["output"]["automatic_output"]:
             input("\nPress enter to continue...")
 
         # Header for ACV index (ACV1, ACV2, etc.)
@@ -234,9 +233,9 @@ class Logger:
 
         global penalty_improvements, regret_improvements
 
-        print(get_config('output', 'major_divider'))
+        print(CONFIG["output"]["major_divider"])
 
-        num_sim_runs = get_config('simulation', 'num_simulation_runs')
+        num_sim_runs = CONFIG["simulation"]["num_simulation_runs"]
         current_sim = len(penalty_improvements) + 1
         if (num_sim_runs > 1):
             print("Simulation " + str(current_sim) + " of " + str(num_sim_runs) + ":")
@@ -266,7 +265,7 @@ class Logger:
         regret_improvements.append(regret_improvement)
 
         print("\n" + self.model_name + " Metrics:")
-        print(get_config('output', 'minor_divider'))
+        print(CONFIG["output"]["minor_divider"])
 
         print("• Total crashes: " + str(crashes))
         
@@ -284,17 +283,17 @@ class Logger:
 
             self.start_visualization()
 
-            print(get_config('output', 'major_divider'))
+            print(CONFIG["output"]["major_divider"])
 
     def start_visualization(self):
-        if (not get_config('output', 'prompt_visualization')):
+        if not CONFIG["('output"]["prompt_visualization"]:
             return
 
-        print(get_config('output', 'major_divider'))
+        print(CONFIG["output"]["major_divider"])
 
         response = ''
         while (response != 'y' and response != 'n'):
-            num_sim_runs = get_config('simulation', 'num_simulation_runs')
+            num_sim_runs = CONFIG["simulation"]["num_simulation_runs"]
 
             # Clarify which simulation you are visualizing if running multiple simulations
             prompt = "Would you like to run the visualization"
@@ -304,7 +303,7 @@ class Logger:
             
             prompt += sim_distinction + "? [y/n] "
 
-            if not get_config('output', 'automatic_output'):
+            if not CONFIG["output"]["automatic_output"]:
                 response = input(prompt).lower()
             else:
                 response = "y"
@@ -323,7 +322,7 @@ class Logger:
             print("Exiting...")
 
     def print_improvements_lists(self):
-        print(get_config('output', 'major_divider'))
+        print(CONFIG["output"]["major_divider"])
 
         print("Metrics for All Simulations:")
 
