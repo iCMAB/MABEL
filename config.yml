@@ -1,0 +1,28 @@
+acvs:
+  num_acvs: 4
+  target_distance: 5
+  max_acceleration: 1
+  max_speed: 10
+
+models:
+  d: 1
+  alpha: 0.1
+  epsilon: 0.5
+  n_bootstrap: 1000
+  residual_threshold: 5
+  crash_penalty: 5000
+
+simulation:
+  num_simulation_runs: 1
+  iterations: 200
+  training_iterations: 5
+  sensor_failure_rate: 0.01
+  sensor_failure_range: [0, 5]
+
+logging:
+  automatic_output: true
+  show_output_table: true
+  prompt_visualization: true
+  major_divider: "\n=====================================\n"
+  minor_divider: "--------"
+
