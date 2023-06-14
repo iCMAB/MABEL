@@ -1,33 +1,29 @@
 import numpy as np
+import math
 
-from .mab_model import MABModel, Arm
+from src.utils import CONFIG
+from .mab_model import MABModel
+
 
 class LinearUCB(MABModel):
     def __init__(
             self,
             n_arms: int,
-            d: int,
-            alpha: float,
     ):
         super().__init__(n_arms)
 
+        self.d = CONFIG["models"]["linear_ucb"]["d"]
+        self.alpha = CONFIG["models"]["linear_ucb"]["alpha"]
+
+        self.a = [np.identity(self.d)] * self.n_arms
+        self.b = [np.zeros((self.d, 1))] * self.n_arms
+        self.theta = [np.zeros((self.d, 1))] * self.n_arms
+
         # Initialize internal models of arm rewards
-        self.arms = [_Arm(arm_index=1, d=d, alpha=alpha) for _ in range(n_arms)]
+        self.arms = [_Arm(arm_index=i, d=self.d, alpha=self.alpha) for i in range(n_arms)]
 
-        # Keep track of alpha
-        self.alpha = alpha
-
-        # a: (d x d) matrix = D_a.T * D_a + I_d.
-        # The inverse of A is used in ridge regression
-        self.a = np.identity(d)
-
-        # b: (d x 1) corresponding response vector.
-        # Equals to D_a.T * c_a in ridge regression formulation
-        self.b = np.zeros([d, 1])
-
-    def select_arm(self, deltas: list[float]) -> int:
-        # Save context for reward learning once reward is given
-        self.context = np.array(deltas)
+    def select_arm(self, context: list[float]) -> int:
+        self.context = np.ndarray((len(context),), buffer=np.array(context))
 
         highest_ucb = -1
         candidate_arms = []
@@ -55,11 +51,9 @@ class LinearUCB(MABModel):
         return "Linear UCB"
 
 
-class _Arm(Arm):
+class _Arm:
     def __init__(self, arm_index: int, d: int, alpha: float):
-        super().__init__(arm_index=arm_index)
-
-        # Keep track of alpha
+        self.index = arm_index
         self.alpha = alpha
 
         # A: (d x d) matrix = D_a.T * D_a + I_d.
@@ -70,7 +64,7 @@ class _Arm(Arm):
         # Equals to D_a.T * c_a in ridge regression formulation
         self.b = np.zeros([d, 1])
 
-    def calculate_ucb(self, x_array) -> float:
+    def calculate_ucb(self, context) -> float:
         # Find A inverse for ridge regression
         a_inv = np.linalg.inv(self.a)
 
@@ -78,7 +72,7 @@ class _Arm(Arm):
         theta = np.dot(a_inv, self.b)  # theta is (d x 1) dimension vector
 
         # Reshape covariates input into (d x 1) shape vector
-        x = x_array.reshape([-1, 1])
+        x = context.reshape([-1, 1])
 
         # Find ucb based on p formulation (mean + std_dev)
         # p is (1 x 1) dimension vector

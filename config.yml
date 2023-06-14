@@ -3,14 +3,14 @@ acvs:
   target_distance: 5
   max_acceleration: 1
   max_speed: 10
+  crash_penalty: 5000
 
 models:
-  d: 1
-  alpha: 0.1
+  linear_ucb:
+    d: 4
+    alpha: 0.1
   epsilon: 0.5
   n_bootstrap: 1000
-  residual_threshold: 5
-  crash_penalty: 5000
 
 simulation:
   num_simulation_runs: 1

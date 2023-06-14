@@ -25,7 +25,7 @@ class ACVManager:
 
         self.frame_num = 0
 
-        self.acv_distance_deltas: list[int] = [0] * len(self.acvs)
+        self.acv_distance_deltas: list[float] = [0.0] * len(self.acvs)
         self.ignored_sensors = []
 
     def run_simulation(self):
@@ -82,20 +82,19 @@ class ACVManager:
 
     def monitor(self):
         """Get observed distances from every ACV"""
-        if self.model.context:
+        if self.model.context is not None:
             # Don't update reward if no decisions have been made yet
             reward = 0
-            for i, acv in enumerate(self.acvs):
-                if acv != self.acvs[-1]:
-                    # Since we want to avoid sub-optimal behavior, reward is negative (regret)
-                    reward -= math.pow(acv.target_distance - self.get_distance_to_next_acv(i), 2)
+            for i, acv in enumerate(self.acvs[:-1]):
+                # Since we want to avoid sub-optimal behavior, reward is negative (regret)
+                reward -= math.pow(acv.target_distance - self.get_distance_to_next_acv(i), 2)
             self.model.update_reward(reward)
 
         for i, acv in enumerate(self.acvs):
             if acv.observed_distance:
                 self.acv_distance_deltas[i] = acv.observed_distance - acv.target_distance
             else:
-                self.acv_distance_deltas[i] = 0
+                self.acv_distance_deltas[i] = 0.0
 
     def analyze(self):
         """
